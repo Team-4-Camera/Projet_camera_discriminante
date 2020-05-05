@@ -1,1 +1,0 @@
-# Projet_camera_discriminante

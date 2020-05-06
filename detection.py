@@ -95,19 +95,22 @@ MODEL_NAME='ssd_mobilenet_v2_coco_2018_03_29' # repertoire contenant tous les fi
 PATH_TO_FROZEN_GRAPH=MODEL_NAME+'/frozen_inference_graph.pb'
 color_infos=(255, 255, 0)
 
+#Lecture du modèle qui a déjà était entrainée avec le dataset COCO
 detection_graph=tf.Graph()
 with detection_graph.as_default():
   od_graph_def=tf.GraphDef()
+  #Recupère le modèle
   with tf.gfile.GFile(PATH_TO_FROZEN_GRAPH, 'rb') as fid:
     serialized_graph=fid.read()
     od_graph_def.ParseFromString(serialized_graph)
+     #importer od_graph_def dans le graph courant
     tf.import_graph_def(od_graph_def, name='')
 
 with detection_graph.as_default():
     with tf.Session() as sess:
         #cap=cv2.VideoCapture('video1.mp4')
         cap = cv2.VideoCapture(0) # récupère les images de la webcam intégré
-        ops=tf.get_default_graph().get_operations()
+        ops=tf.get_default_graph().get_operations() #retourne la liste des opération dans le graphe
         all_tensor_names={output.name for op in ops for output in op.outputs}
         tensor_dict={}
         for key in [

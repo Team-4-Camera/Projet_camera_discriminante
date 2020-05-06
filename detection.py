@@ -121,7 +121,7 @@ with detection_graph.as_default():
         image_tensor=tf.get_default_graph().get_tensor_by_name('image_tensor:0')
         
         
-************************* Partie 
+************************* Partie exploitation de la vidéo ***********************************
 
         while True:
             ret, frame=cap.read() # lit les images provenant de la webcam présent dans cap

@@ -4,7 +4,7 @@ import numpy as np
 import pickle
 import common as c
 
-image_dir="./photos/"
+image_dir="photos/"
 current_id=0
 label_ids={}
 x_train=[]
@@ -33,6 +33,7 @@ with open("labels.pickle", "wb") as f:
 
 x_train=np.array(x_train)
 y_labels=np.array(y_labels)
+# Reconnaissance de visage
 recognizer=cv2.face.LBPHFaceRecognizer_create()
 recognizer.train(x_train, y_labels)
 recognizer.save("trainner.yml")

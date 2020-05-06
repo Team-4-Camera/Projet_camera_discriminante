@@ -103,7 +103,8 @@ with detection_graph.as_default():
 
 with detection_graph.as_default():
     with tf.Session() as sess:
-        cap=cv2.VideoCapture('video1.mp4')
+        #cap=cv2.VideoCapture('video1.mp4')
+        cap = cv2.VideoCapture(0)
         ops=tf.get_default_graph().get_operations()
         all_tensor_names={output.name for op in ops for output in op.outputs}
         tensor_dict={}
@@ -128,14 +129,15 @@ with detection_graph.as_default():
             for objet in range(nbr_object):
                 ymin, xmin, ymax, xmax=boxes[objet]
                 if scores[objet]>0.30:
-                    height, width=frame.shape[:2]
-                    xmin=int(xmin*width)
-                    xmax=int(xmax*width)
-                    ymin=int(ymin*height)
-                    ymax=int(ymax*height)
-                    cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color_infos, 1)
-                    txt="{:s}:{:3.0%}".format(labels[classes[objet]], scores[objet])
-                    cv2.putText(frame, txt, (xmin, ymin-5), cv2.FONT_HERSHEY_PLAIN, 1, color_infos, 2)
+                    if classes[objet] == 1 or classes[objet] == 16 or classes[objet] == 17 or classes[objet] == 18 or classes[objet] == 19 or classes[objet] == 20 or classes[objet] == 21 or classes[objet] == 22 or classes[objet] == 23:
+                        height, width=frame.shape[:2]
+                        xmin=int(xmin*width)
+                        xmax=int(xmax*width)
+                        ymin=int(ymin*height)
+                        ymax=int(ymax*height)
+                        cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color_infos, 1)
+                        txt="{:s}:{:3.0%}".format(labels[classes[objet]], scores[objet])
+                        cv2.putText(frame, txt, (xmin, ymin-5), cv2.FONT_HERSHEY_PLAIN, 1, color_infos, 2)
             fps=cv2.getTickFrequency()/(cv2.getTickCount()-tickmark)
             cv2.putText(frame, "FPS: {:05.2f}".format(fps), (10, 20), cv2.FONT_HERSHEY_PLAIN, 1, color_infos, 2)
             cv2.imshow('image', frame)

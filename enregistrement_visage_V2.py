@@ -4,7 +4,8 @@ import os
 import common as c
 
 face_cascade=cv2.CascadeClassifier("./haarcascade_frontalface_alt2.xml")
-cap=cv2.VideoCapture("Hu.mp4")
+#cap=cv2.VideoCapture("Hu.mp4")
+cap=cv2.VideoCapture(0)
 img_non_classees='non-classees'
 
 if not os.path.isdir(img_non_classees):
@@ -16,6 +17,7 @@ while True:
     if ret is False:
         break
     gray=cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    #Détecte des objets de différentes tailles dans l'image d'entrée. Les objets détectés sont renvoyés sous forme de liste de rectangles.
     face=face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=4, minSize=(c.min_size, c.min_size))
     for x, y, w, h in face:
         cv2.imwrite("{}/p-{:d}.png".format(img_non_classees, id), frame[y:y+h, x:x+w])

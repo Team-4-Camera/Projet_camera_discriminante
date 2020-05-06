@@ -2,6 +2,7 @@ import numpy as np
 import tensorflow.compat.v1 as tf
 import cv2
 import time
+import envoimail
 
 tf.disable_v2_behavior()
 
@@ -92,6 +93,7 @@ MODEL_NAME = 'ssd_mobilenet_v2_coco_2018_03_29'
 PATH_TO_FROZEN_GRAPH = MODEL_NAME + '/frozen_inference_graph.pb'
 color_infos = (255, 255, 0)
 fichier_video = None
+nom_fichier = ""
 cpt_fin_mouvement = -1
 
 # variables parametrables
@@ -159,7 +161,8 @@ with detection_graph.as_default():
                     if classes[objet] in {16, 17, 18, 19, 20, 21, 22, 23, 24, 25}:  # si un animal est détecté
                         # on crée un fichier video s'il s'agit de la premiere image enregistrée
                         if fichier_video is None:
-                            fichier_video = dir_videos + time.strftime("%Y_%m_%d_%H_%M_%S") + ".avi"
+                            nom_fichier = time.strftime("%Y_%m_%d_%H_%M_%S") + ".avi"
+                            fichier_video = dir_videos + nom_fichier
                             video = cv2.VideoWriter(fichier_video, cv2.VideoWriter_fourcc(*'DIVX'), 15,
                                                     (largeur, hauteur))
 
@@ -169,8 +172,11 @@ with detection_graph.as_default():
                 video.write(frame)  # on écrit dans la video tant que le compteur n'atteint pas 0
 
             if cpt_fin_mouvement == 0:
+                envoimail.envoyermail("robin.lemancel@gmail.com", "Intrusion",
+                                      "Un pangolin sauvage a été détecté", nom_fichier)
                 video.release()  # on cloture la video si aucun animal n'a été détecté depuis cpt_fin_mouvement images
                 fichier_video = None
+                nom_fichier = ""
 
             cpt_fin_mouvement = cpt_fin_mouvement - 1
 

@@ -89,7 +89,9 @@ labels={
  90: "toothbrush"
 }
 
-MODEL_NAME='ssd_mobilenet_v2_coco_2018_03_29'
+*************************** Partie IA tensorflow *************************************
+
+MODEL_NAME='ssd_mobilenet_v2_coco_2018_03_29' # repertoire contenant tous les fichiers tensorflow
 PATH_TO_FROZEN_GRAPH=MODEL_NAME+'/frozen_inference_graph.pb'
 color_infos=(255, 255, 0)
 
@@ -104,7 +106,7 @@ with detection_graph.as_default():
 with detection_graph.as_default():
     with tf.Session() as sess:
         #cap=cv2.VideoCapture('video1.mp4')
-        cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture(0) # récupère les images de la webcam intégré
         ops=tf.get_default_graph().get_operations()
         all_tensor_names={output.name for op in ops for output in op.outputs}
         tensor_dict={}
@@ -117,27 +119,31 @@ with detection_graph.as_default():
         if 'detection_masks' in tensor_dict:
             quit("Masque non géré")
         image_tensor=tf.get_default_graph().get_tensor_by_name('image_tensor:0')
+        
+        
+************************* Partie 
 
         while True:
-            ret, frame=cap.read()
+            ret, frame=cap.read() # lit les images provenant de la webcam présent dans cap
             tickmark=cv2.getTickCount()
-            output_dict=sess.run(tensor_dict, feed_dict={image_tensor: np.expand_dims(frame, 0)})
-            nbr_object=int(output_dict['num_detections'])
-            classes=output_dict['detection_classes'][0].astype(np.uint8)
-            boxes=output_dict['detection_boxes'][0]
-            scores=output_dict['detection_scores'][0]
-            for objet in range(nbr_object):
-                ymin, xmin, ymax, xmax=boxes[objet]
-                if scores[objet]>0.30:
+            output_dict=sess.run(tensor_dict, feed_dict={image_tensor: np.expand_dims(frame, 0)}) # donne notre image au réseau de neurones
+            nbr_object=int(output_dict['num_detections'])  # nombre d'objets présent
+            classes=output_dict['detection_classes'][0].astype(np.uint8) # le tableau avec les identifiants
+            boxes=output_dict['detection_boxes'][0] # les points qui décrivent le rectangle autour des objets
+            scores=output_dict['detection_scores'][0] # probabilité que la detection soit correcte
+            for objet in range(nbr_object): # on parcours tous les objets
+                ymin, xmin, ymax, xmax=boxes[objet] 
+                if scores[objet]>0.30:  # si le score est supérieur à 30%
                     if classes[objet] == 1 or classes[objet] == 16 or classes[objet] == 17 or classes[objet] == 18 or classes[objet] == 19 or classes[objet] == 20 or classes[objet] == 21 or classes[objet] == 22 or classes[objet] == 23:
-                        height, width=frame.shape[:2]
+                        # on affiche seulement les objets qui nous interessent 
+                        height, width=frame.shape[:2] 
                         xmin=int(xmin*width)
                         xmax=int(xmax*width)
                         ymin=int(ymin*height)
                         ymax=int(ymax*height)
-                        cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color_infos, 1)
-                        txt="{:s}:{:3.0%}".format(labels[classes[objet]], scores[objet])
-                        cv2.putText(frame, txt, (xmin, ymin-5), cv2.FONT_HERSHEY_PLAIN, 1, color_infos, 2)
+                        cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color_infos, 1) # on dessine le rectangle autour de l'objet
+                        txt="{:s}:{:3.0%}".format(labels[classes[objet]], scores[objet]) # on affiche le score et le label
+                        cv2.putText(frame, txt, (xmin, ymin-5), cv2.FONT_HERSHEY_PLAIN, 1, color_infos, 2) # 
             fps=cv2.getTickFrequency()/(cv2.getTickCount()-tickmark)
             cv2.putText(frame, "FPS: {:05.2f}".format(fps), (10, 20), cv2.FONT_HERSHEY_PLAIN, 1, color_infos, 2)
             cv2.imshow('image', frame)

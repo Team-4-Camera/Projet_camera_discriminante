@@ -97,9 +97,11 @@ nom_fichier = ""
 cpt_fin_mouvement = -1
 
 # variables parametrables
-dir_videos = "c:\\enregistrements\\"
-precision_retenue = 0.50
-fin_mouvement = 40
+dir_videos = "c:\\enregistrements\\"  # le répertoire dans lequel sont enregistrés les vidéos
+precision_retenue = 0.50  # l'indice de confiance minimum pour détecter un objet
+fin_mouvement = 40  # le nombre d'images sans détection avant de couper la vidéo
+source_video = 0  # la source de la vidéo, 0 pour cam intégré, nom d'un fichier pour vidéo
+destinataire = ""  # l'adresse mail du destinataire à qui sera envoyé le mail
 
 
 # *************************** Partie IA tensorflow *************************************
@@ -118,7 +120,7 @@ with detection_graph.as_default():
 with detection_graph.as_default():
     with tf.Session() as sess:
         # cap=cv2.VideoCapture('video1.mp4')
-        cap = cv2.VideoCapture(0)  # récupére les images de la webcam intégré
+        cap = cv2.VideoCapture(source_video)  # récupére les images de la webcam intégré
         ops = tf.get_default_graph().get_operations()  # retourne la liste des opérations dans le graphe
         all_tensor_names = {output.name for op in ops for output in op.outputs}
         tensor_dict = {}
@@ -172,8 +174,8 @@ with detection_graph.as_default():
                 video.write(frame)  # on écrit dans la video tant que le compteur n'atteint pas 0
 
             if cpt_fin_mouvement == 0:
-                envoimail.envoyermail("robin.lemancel@gmail.com", "Intrusion",
-                                      "Un pangolin sauvage a été détecté", nom_fichier)
+                envoimail.envoyermail(destinataire, "Intrusion",
+                                      "Un pangolin sauvage a été détecté", dir_videos, nom_fichier)
                 video.release()  # on cloture la video si aucun animal n'a été détecté depuis cpt_fin_mouvement images
                 fichier_video = None
                 nom_fichier = ""

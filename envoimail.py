@@ -4,10 +4,8 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 
-chemin_fichiers = "c:\\enregistrements\\"
 
-
-def envoyermail(toadd, subject, msg, nom_fichier):
+def envoyermail(toadd, subject, msg, chemin_fichiers, nom_fichier):
     fromadd = "cameradiscriminante@gmail.com"
     message = MIMEMultipart()  ## Création de l'objet "message"
     message['From'] = fromadd  ## Spécification de l'expéditeur

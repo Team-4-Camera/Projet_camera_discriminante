@@ -3,40 +3,28 @@
 </script> 
 <?php 
 
-function explorerIterator($chemin){  
 
- $files = array();
-$it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($chemin));
- 
-while($it->valid()) {
-	if (!$it->isDot()) {
-		//echo 'SubPathName: ' . $it->getSubPathName() . "\n";
-		//echo 'SubPath:	 ' . $it->getSubPath() . "\n";
-		//echo 'Key:		 ' . $it->key() . "\n\n";
 
-		array_push($files ,$it->key()); 
-	}
+function explorer($chemin){ 
+$iterator = new RecursiveDirectoryIterator($chemin, RecursiveIteratorIterator::CHILD_FIRST);
+$iterator->setFlags(RecursiveDirectoryIterator::SKIP_DOTS);
+$ritit = new RecursiveIteratorIterator($iterator);
+$r = array();
+foreach ($ritit as $splFileInfo) {
+
+   $path = $splFileInfo->isDir() 
+         ? array($splFileInfo->getFilename() => array())
+         : array($splFileInfo->getFilename());
+
+   for ($depth = $ritit->getDepth() - 1; $depth >= 0; $depth--) {
+       $path = array($ritit->getSubIterator($depth)->current()->getFilename() => $path);
+   }
+
  
-	$it->next();
+   $r = array_merge_recursive($r, $path);
 }
 
-return $files;
-}
-
-
-
-function explorer($chemin){  
-    // Si $chemin est un dossier on le parcours
-    if( is_dir($chemin) ){
-        $me = opendir($chemin);
-        while( $child = readdir($me) ){
-            if( $child != '.' && $child != '..' ){
-                explorer( $chemin.DIRECTORY_SEPARATOR.$child );
-            }
-        }
-    }else{
-    	    echo "$chemin   type: $filetype size: $lstat[size]  mtime: $mtime\n";
-    }
+return $r;
 }
 
 

@@ -31,17 +31,49 @@ return $r;
 function afficheImage($lesDossiers, $chemin, $poid){
 	foreach ($lesDossiers as $key => $value) {    
     	if (is_array($value)) {
+    		if(preg_match("/[0-9]{4}_[0-9]{2}_[0-9]{2}/",$key)){
+    			$titre = dateFormat($key);
+    		}else{
+				$titre = $key;
+    		}
     		if ($poid == 0){
-    			echo "<h1>".$key."</h1>";
+    			echo "<h1>".$titre."</h1>";
     		}
     		else{
-				echo "<h3>".$key."</h3>";
+				echo "<h3>".$titre."</h3>";
     		}      
         afficheImage($value, $chemin.$key."/",$poid+1 );
     	}else{
-     		?><img src= "<?php echo  $chemin.$value?>"  alt="chien"  height="150" width="150"/><?php
+     		?><img src= "<?php echo  $chemin.$value?>"  alt="<?php echo $chemin.$value ?>"  height="160" width="160"/><?php
         }
 	}
+}
+
+
+function dateFormat($date){
+
+$newDate = explode("_", $date);
+
+return $newDate[2]." ".searchMonth($newDate[1])." ".$newDate[0] ;
+}
+
+
+function searchMonth($month){
+
+$string = array( "01" => "Janvier", 
+				 "02" => "Février",
+				 "03" => "Mars",
+				 "04" => "Avril",
+				 "05" => "Mai",
+				 "06" => "Juin", 
+				 "07" => "Juillet", 
+				 "08" => "Août", 
+				 "09" => "Septembre",
+    			 "10" => "Octobre",
+    			 "11" => "Novembre",
+    			 "12" => "Décembre" );
+
+return $string[$month]; 
 }
 
 ?>

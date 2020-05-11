@@ -7,6 +7,7 @@ switch ($action) {
 	case 'vueNotif' :
 		{
 			$lesDossiers = explorer("./animaux");
+			$lesPersonnes = explorer("./humains");
 			include ("vue/v_notification.php");
 			break;
 		}

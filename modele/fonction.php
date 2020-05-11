@@ -28,4 +28,20 @@ return $r;
 }
 
 
+function afficheImage($lesDossiers, $chemin, $poid){
+	foreach ($lesDossiers as $key => $value) {    
+    	if (is_array($value)) {
+    		if ($poid == 0){
+    			echo "<h1>".$key."</h1>";
+    		}
+    		else{
+				echo "<h3>".$key."</h3>";
+    		}      
+        afficheImage($value, $chemin.$key."/",$poid+1 );
+    	}else{
+     		?><img src= "<?php echo  $chemin.$value?>"  alt="chien"  height="150" width="150"/><?php
+        }
+	}
+}
+
 ?>

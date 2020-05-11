@@ -1,9 +1,9 @@
 
 <div>
 
-<h1>Les animaux</h1>
+<h2>Les animaux</h2>
 <?php
- echo dateFormat("2020_05_03");
+
  afficheImage($lesDossiers,"./animaux/",0);
 
 ?>

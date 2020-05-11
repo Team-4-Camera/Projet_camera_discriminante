@@ -37,14 +37,22 @@ function afficheImage($lesDossiers, $chemin, $poid){
 				$titre = $key;
     		}
     		if ($poid == 0){
-    			echo "<h1>".$titre."</h1>";
+    			echo "<h3>".$titre."</h3>";
     		}
     		else{
-				echo "<h3>".$titre."</h3>";
+				echo "<h4>".$titre."</h4>";
     		}      
         afficheImage($value, $chemin.$key."/",$poid+1 );
     	}else{
-     		?><img src= "<?php echo  $chemin.$value?>"  alt="<?php echo $chemin.$value ?>"  height="160" width="160"/><?php
+		 
+
+     		if( strpos(mime_content_type($chemin.$value), 'video')  !== false){?>
+				<video controls src="<?php echo  $chemin.$value?>" height="300" width="300" ><?php echo $chemin.$value ?></video><?php
+     		}else{?>
+				<img src= "<?php echo  $chemin.$value?>"  alt="<?php echo $chemin.$value ?>"  height="300" width="300"/><?php
+     		}
+     		
+     		
         }
 	}
 }

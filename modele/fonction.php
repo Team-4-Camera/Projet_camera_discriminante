@@ -49,7 +49,8 @@ function afficheImage($lesDossiers, $chemin, $poid){
      		if( strpos(mime_content_type($chemin.$value), 'video')  !== false){?>
 				<video controls src="<?php echo  $chemin.$value?>" height="300" width="300" ><?php echo $chemin.$value ?></video><?php
      		}else{?>
-				<img src= "<?php echo  $chemin.$value?>"  alt="<?php echo $chemin.$value ?>"  height="300" width="300"/><?php
+
+				<img src= "<?php echo  $chemin.$value?>"  alt="<?php echo $chemin.$value ?>"  height="300" width="300" onclick="window.open(this.src,'_blank',' width='+this.width+', height='+this.height);"/><?php
      		}
      		
      		

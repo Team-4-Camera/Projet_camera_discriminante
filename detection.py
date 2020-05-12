@@ -2,6 +2,7 @@ import numpy as np
 import tensorflow.compat.v1 as tf
 import cv2
 import time
+import os
 import envoimail
 
 tf.disable_v2_behavior()
@@ -184,8 +185,15 @@ with detection_graph.as_default():
                         # TODO???: ajouter un controle pour tester si le chat apparait sur plusieurs frames
                         #  avant d'enregistrer l'image pour éviter les faux positifs
 
-                        # recupere le répertoire ou enregistrer la photo de l'animal détecté
+                        # recupere le répertoire concernant l'animal détecté
                         dir_photos = chemin_animaux + switcher.get(classes[objet]) + "/"
+
+                        # crée le repertoire du jour courant s'il n'existe pas
+                        if not os.path.isdir(dir_photos + time.strftime("%Y_%m_%d")):
+                            os.mkdir(dir_photos + time.strftime("%Y_%m_%d"))
+
+                        # met à jour le répertoire ou il faut enregistrer l'image de l'animal
+                        dir_photos = dir_photos + time.strftime("%Y_%m_%d") + "/"
 
                         # on crée un fichier photo
                         if fichier_photo is None:

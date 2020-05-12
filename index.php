@@ -1,5 +1,6 @@
 <?php
 require_once("modele/fonction.php");
+require_once("modele/fonction2.php");
 include ("vue/v_header.php");
 	if (! isset ( $_REQUEST ['uc'] )) {
 		$_REQUEST ['uc'] = 'acceuil';

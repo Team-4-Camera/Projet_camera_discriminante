@@ -2,7 +2,7 @@ import cv2
 import os
 import numpy as np
 import pickle
-import common as c
+import algorithm_variables as algo
 
 image_dir="photos/"
 current_id=0
@@ -20,7 +20,7 @@ for root, dirs, files in os.walk(image_dir):
                     label_ids[label]=current_id
                     current_id+=1
                 id_=label_ids[label]
-                image=cv2.resize(cv2.imread(path, cv2.IMREAD_GRAYSCALE), (c.min_size, c.min_size))
+                image=cv2.resize(cv2.imread(path, cv2.IMREAD_GRAYSCALE), (algo.min_size, algo.min_size))
                 fm=cv2.Laplacian(image, cv2.CV_64F).var()
                 if fm<250:
                     print("Photo exclue:", path, fm)

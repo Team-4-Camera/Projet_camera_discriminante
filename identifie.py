@@ -2,7 +2,7 @@
 import cv2
 import pickle
 import numpy as np
-import common as c
+import algorithm_variables as algo
 
 face_cascade= cv2.CascadeClassifier('haarcascade_frontalface_alt2.xml')
 recognizer=cv2.face.LBPHFaceRecognizer_create()
@@ -23,7 +23,7 @@ while True:
     gray=cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces=face_cascade.detectMultiScale(gray, scaleFactor=1.05,minNeighbors=4, minSize=(c.min_size, c.min_size))
     for (x, y, w, h) in faces:
-        roi_gray=cv2.resize(gray[y:y+h, x:x+w], (c.min_size, c.min_size))
+        roi_gray=cv2.resize(gray[y:y+h, x:x+w], (algo.min_size, algo.min_size))
         id_, conf=recognizer.predict(roi_gray)
         if conf<=95:
              color=color_ok

@@ -1,6 +1,6 @@
 import cv2
 import operator
-import common as c
+import algorithm_variables as algo
 
 face_cascade=cv2.CascadeClassifier("./haarcascade_frontalface_alt2.xml")
 # Create a VideoCapture object and read from input file 
@@ -14,7 +14,7 @@ while True:
     # lire la vidéo image par image
     ret, frame=cap.read()
     gray=cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    face=face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=4, minSize=(c.min_size, c.min_size))
+    face=face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=4, minSize=(algo.min_size, algo.min_size))
     # récupérer le visage via un quadruplet
     for x, y, w, h in face:
         cv2.imwrite("non-classees/p-{:d}.png".format(id), frame[y:y+h, x:x+w])

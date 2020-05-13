@@ -45,7 +45,7 @@ $(document).ready(function(){
      }
      else
      {
-      alert("Enter Folder Name");
+      alert("Entrer nom du dossier");
      }
     });
     

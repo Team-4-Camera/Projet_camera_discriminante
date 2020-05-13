@@ -3,7 +3,7 @@ if(isset($_POST["action"]))
 {
  if($_POST["action"] == "fetch")
  {
-  $folder = array_filter(glob('../humains/*'), 'is_dir');
+  $folder = array_filter(glob('../record/*'), 'is_dir');
   
   $output = '
   <table class="table table-bordered table-striped">
@@ -41,11 +41,11 @@ if(isset($_POST["action"]))
  if($_POST["action"] == "create")
  {
   $dirname = $_POST["folder_name"];
-  $filename = "../humains/" . $dirname . "/";
+  $filename = "../record/" . $dirname . "/";
   if(!file_exists($filename)) 
   
   {
-   mkdir("../humains/" . $dirname, 0777, true);
+   mkdir("../record/" . $dirname, 0777, true);
    echo 'Dossier crée';
   }
   else
@@ -59,8 +59,8 @@ if(isset($_POST["action"]))
  {
   $dirname = $_POST["folder_name"];
   $oldDirname = $_POST["old_name"];
-  $filename = "../humains/" . $dirname . "/";
-  $oldFilename = "../humains/" . $oldDirname . "/";
+  $filename = "../record/" . $dirname . "/";
+  $oldFilename = "../record/" . $oldDirname . "/";
   if(!file_exists($filename))
   {
    rename($oldFilename, $filename);
@@ -75,7 +75,7 @@ if(isset($_POST["action"]))
  if($_POST["action"] == "delete")
  {
   $dirname = $_POST["folder_name"];
-  $filename = "../humains/" . $dirname . "/";
+  $filename = "../record/" . $dirname . "/";
   $files = scandir($filename);
   foreach($files as $file)
   {

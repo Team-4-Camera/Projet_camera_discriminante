@@ -6,6 +6,6 @@ $image = explode(",", $image)[1];
 $image =str_replace(" ", "+", $image);
 $image = base64_decode($image);
 
-file_put_contents("./humains/".$str."p.png", $image);
+file_put_contents("../humains/".$str."p.png", $image);
 echo "Done";
 

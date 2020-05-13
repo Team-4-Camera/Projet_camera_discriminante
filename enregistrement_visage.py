@@ -34,6 +34,7 @@ fichier_photo = None
 nom_video = ""
 nom_photo = ""
 cpt_fin_mouvement = -1
+id=0
 
 
 # variables parametrables
@@ -41,7 +42,7 @@ dir_videos = "c:\\enregistrements\\"  # le répertoire dans lequel sont enregist
 precision_retenue = 0.50  # l'indice de confiance minimum pour détecter un objet
 fin_mouvement = 40  # le nombre d'images sans détection avant de couper la vidéo
 source_video = "Hu.mp4"  # la source de la vidéo, 0 pour cam intégré (sys.argv[] cast en int si argument), nom d'un fichier pour vidéo
-destinataire = "yann-bourhis@laposte.net"  # l'adresse mail du destinataire à qui sera envoyé le mail
+destinataire = "xxxxxx@xxx.x"  # l'adresse mail du destinataire à qui sera envoyé le mail
 
 
 # *************************** Partie IA tensorflow *************************************
@@ -89,16 +90,16 @@ with detection_graph.as_default():
                 ymin, xmin, ymax, xmax = boxes[objet]
 
                 if scores[objet] > precision_retenue:  # si le score est supérieur au paramétrage
-                    if classes[objet] in {1, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}:
+                    # if classes[objet] in {1, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}:
                         # TODO: supprimer les lignes suivantes qui ne nous servent que pour les tests
-                        height, width = frame.shape[:2]
-                        xmin = int(xmin * width)
-                        xmax = int(xmax * width)
-                        ymin = int(ymin * height)
-                        ymax = int(ymax * height)
-                        cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color_infos, 1)
-                        txt = "{:s}:{:3.0%}".format(labels[classes[objet]], scores[objet])
-                        cv2.putText(frame, txt, (xmin, ymin - 5), cv2.FONT_HERSHEY_PLAIN, 1, color_infos, 2)
+                        # height, width = frame.shape[:2]
+                        # xmin = int(xmin * width)
+                        # xmax = int(xmax * width)
+                        # ymin = int(ymin * height)
+                        # ymax = int(ymax * height)
+                        #cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color_infos, 1)
+                        # txt = "{:s}:{:3.0%}".format(labels[classes[objet]], scores[objet])
+                        # cv2.putText(frame, txt, (xmin, ymin - 5), cv2.FONT_HERSHEY_PLAIN, 1, color_infos, 2)
 
                     if classes[objet] == 1:
 

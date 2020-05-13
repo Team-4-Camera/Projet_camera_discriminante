@@ -11,6 +11,7 @@
 	<form method="POST" action="index.php?uc=notification&action=vueNotif">
 		<input type="submit" value="Voir les notifications" name="notif">
 	</form>
+<<<<<<< HEAD
 -->
 </div>
 
@@ -18,3 +19,10 @@
 </body>
 
 </html>
+=======
+
+		<form method="POST" action="index.php?uc=personne&action=vuePerson">
+		<input type="submit" value="Gestion des personnes" name="gestion">
+	</form>
+</div>
+>>>>>>> b4a1dd7d22a6d56817a539087aaba234287bd767

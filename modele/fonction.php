@@ -50,7 +50,9 @@ function afficheImage($lesDossiers, $chemin, $poid){
 				<video controls src="<?php echo  $chemin.$value?>" height="300" width="300" ><?php echo $chemin.$value ?></video><?php
      		}else{?>
 
-				<img src= "<?php echo  $chemin.$value?>"  alt="<?php echo $chemin.$value ?>"  height="300" width="300" onclick="window.open(this.src,'_blank',' width='+this.width+', height='+this.height);"/><?php
+				<a href="<?php echo  $chemin.$value?>" target="_blank"><img src= "<?php echo  $chemin.$value?>"  alt="<?php echo $chemin.$value ?>"  height="300" width="300" /></a>
+
+				<!--<img src= "<?php //echo  $chemin.$value?>"  alt="<?php //echo $chemin.$value ?>"  height="300" width="300" onclick="window.open(this.src,'_blank',' width='+this.width+', height='+this.height);"/>--><?php
      		}
      		
      		
@@ -83,6 +85,73 @@ $string = array( "01" => "Janvier",
     			 "12" => "Décembre" );
 
 return $string[$month]; 
+}
+
+function restrictionType($lesDossiers,$leType){
+	foreach ($lesDossiers as $key => $value) { 
+		if ($key != $leType){
+			unset($lesDossiers[$key]); 
+		}
+	}
+
+	return $lesDossiers;
+
+}
+
+function restrictionDate($lesDossiers,$laDate,$person){
+	foreach ($lesDossiers as $key => $value) { 
+		$supprimer = false;
+		if ($key != $laDate and $person){
+			$supprimer = true;
+		}else{
+			if(is_array($value)){
+				foreach ($value as $k => $v) { 
+					if ($k != $laDate){
+						unset($lesDossiers[$key][$k]); 
+						$supprimer = true;
+					}
+				}
+			}
+		}
+		if($supprimer){
+			if (empty($lesDossiers[$key])){
+				unset($lesDossiers[$key]); 
+			}
+		}
+	}
+
+	return $lesDossiers;
+}
+
+function listType($lesDossiers){
+	$my_array = array("All" => "Tout","animaux"=>"Les animaux","personnes" =>"Les personnes");
+	foreach ($lesDossiers as $key => $value) {
+	$my_array[$key] = "Les ".$key;
+	}
+	return $my_array;
+}
+
+
+function listDate($lesDossiers, $lesPersonnes){
+	$my_array = array("All" => "Tout");
+	foreach ($lesDossiers as $key => $value) {
+		foreach ($value as $k => $v) { 
+			if(preg_match("/[0-9]{4}_[0-9]{2}_[0-9]{2}/",$k)){
+				$my_array[$k] = dateFormat($k);
+			}else{
+				$my_array[$k] = $k;
+			}
+		}
+	}
+
+	foreach ($lesPersonnes as $key => $value) {
+		if(preg_match("/[0-9]{4}_[0-9]{2}_[0-9]{2}/",$key)){
+			$my_array[$key] = dateFormat($key);
+		}else{
+			$my_array[$k] = $k;
+		}
+	}
+	return $my_array;
 }
 
 ?>

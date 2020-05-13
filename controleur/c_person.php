@@ -9,6 +9,7 @@ switch ($action) {
             $directory = createDirectory();
             include ("vue/v_addPerson.php");
             break;
+        	
         }
     }
 ?>

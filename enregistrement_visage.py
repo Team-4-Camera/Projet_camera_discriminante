@@ -90,16 +90,16 @@ with detection_graph.as_default():
                 ymin, xmin, ymax, xmax = boxes[objet]
 
                 if scores[objet] > precision_retenue:  # si le score est supérieur au paramétrage
-                    # if classes[objet] in {1, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}:
+                    if classes[objet] in {1, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}:
                         # TODO: supprimer les lignes suivantes qui ne nous servent que pour les tests
-                        # height, width = frame.shape[:2]
-                        # xmin = int(xmin * width)
-                        # xmax = int(xmax * width)
-                        # ymin = int(ymin * height)
-                        # ymax = int(ymax * height)
+                        height, width = frame.shape[:2]
+                        xmin = int(xmin * width)
+                        xmax = int(xmax * width)
+                        ymin = int(ymin * height)
+                        ymax = int(ymax * height)
                         #cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color_infos, 1)
-                        # txt = "{:s}:{:3.0%}".format(labels[classes[objet]], scores[objet])
-                        # cv2.putText(frame, txt, (xmin, ymin - 5), cv2.FONT_HERSHEY_PLAIN, 1, color_infos, 2)
+                        #txt = "{:s}:{:3.0%}".format(labels[classes[objet]], scores[objet])
+                        #cv2.putText(frame, txt, (xmin, ymin - 5), cv2.FONT_HERSHEY_PLAIN, 1, color_infos, 2)
 
                     if classes[objet] == 1:
 
@@ -109,17 +109,19 @@ with detection_graph.as_default():
                         face = face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=4,
                                                              minSize=(min_size, min_size))
                         for x, y, w, h in face:
-                            cv2.imwrite("{}/p-{:d}.png".format(img_non_classees, id), frame[y:y + h, x:x + w])
-                            # TODO: supprimer la création des rectangles qui ne sert que pour nos tests
-                            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
-                            id += 1
+                            # Si le visage est
+                            if x>=xmin and x+w<=xmax and y>=ymin and y+h<=ymax:
+                                cv2.imwrite("{}/p-{:d}.png".format(img_non_classees, id), frame[y:y + h, x:x + w])
+                                # TODO: supprimer la création des rectangles qui ne sert que pour nos tests
+                                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
+                                id += 1
 
                     if classes[objet] in {16, 17, 18, 19, 20, 21, 22, 23, 24, 25}:  # si un animal est détecté
 
                         # TODO???: ajouter un controle pour tester si le chat apparait sur plusieurs frames
                         #  avant d'enregistrer l'image pour éviter les faux positifs
 
-                        # recupere le répertoire ou enregistrer la photo de l'animal détecté
+                        # recupère le répertoire où enregistrer la photo de l'animal détecté
                         dir_photos = chemin_animaux + switcher.get(classes[objet]) + "/"
 
                         # on crée un fichier photo

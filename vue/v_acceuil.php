@@ -10,4 +10,8 @@
 	<form method="POST" action="index.php?uc=notification&action=vueNotif">
 		<input type="submit" value="Voir les notifications" name="notif">
 	</form>
+
+		<form method="POST" action="index.php?uc=personne&action=vuePerson">
+		<input type="submit" value="Gestion des personnes" name="gestion">
+	</form>
 </div>

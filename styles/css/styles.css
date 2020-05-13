@@ -1,0 +1,107 @@
+/* nav-bar */
+.navbar-default {
+  background-color: #582270;
+  background-image: none;
+  background-repeat: no-repeat;
+  line-height: 5px;
+
+  transition-property: margin-top,margin-right;
+  transition-duration: .5s,.1s;
+  transition-delay: 0;
+  transition-timing-function: cubic-bezier(0.22,0.99,0.62,1);
+  -moz-transition-property: margin-top,margin-right;
+  -moz-transition-duration: .5s,.1s;
+  -moz-transition-delay: 0;
+  -moz-transition-timing-function: cubic-bezier(0.22,0.99,0.62,1);
+  -o-transition-property: margin-top,margin-right;
+  -o-transition-duration: .5s,.1s;
+  -o-transition-delay: 0;
+  -o-transition-timing-function: cubic-bezier(0.22,0.99,0.62,1);
+  -ms-transition-property: margin-top,margin-right;
+  -ms-transition-duration: .5s,.1s;
+  -ms-transition-delay: 0;
+  -ms-transition-timing-function: cubic-bezier(0.22,0.99,0.62,1);
+  -webkit-transition-property: margin-top,margin-right;
+  -webkit-transition-duration: .5s,.1s;
+  -webkit-transition-delay: 0;
+  -webkit-transition-timing-function: cubic-bezier(0.22,0.99,0.62,1);
+ 
+  position: fixed;
+  top:0;
+  z-index:1000;
+  width: 90%;
+  margin-bottom: 100px;
+}
+.navbar-default .navbar-brand {
+  color: #c8dee3;
+}
+.navbar-default .navbar-brand:hover, .navbar-default .navbar-brand:focus {
+  color: #eee4e4;
+}
+.navbar-default .navbar-text {
+  color: #c8dee3;
+}
+.navbar-default .navbar-nav > li > a {
+  color: #c8dee3;
+  border-left: 1px solid white;
+  border-right: 1px solid white;
+
+}
+.navbar-default .navbar-nav > li > a:first-letter {
+  text-transform: capitalize
+}
+.navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
+  color: #eee4e4;
+}
+.navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:hover, .navbar-default .navbar-nav > .active > a:focus {
+  color: #eee4e4;
+  background-color: #0e1354;
+}
+.navbar-default .navbar-nav > .open > a, .navbar-default .navbar-nav > .open > a:hover, .navbar-default .navbar-nav > .open > a:focus {
+  color: #eee4e4;
+  background-color: #0e1354;
+}
+.navbar-default .navbar-toggle {
+  border-color: #0e1354;
+}
+.navbar-default .navbar-toggle:hover, .navbar-default .navbar-toggle:focus {
+  background-color: #0e1354;
+}
+.navbar-default .navbar-toggle .icon-bar {
+  background-color: #c8dee3;
+}
+.navbar-default .navbar-collapse,
+.navbar-default .navbar-form {
+  border-color: #c8dee3;
+}
+.navbar-default .navbar-link {
+  color: #c8dee3;
+}
+.navbar-default .navbar-link:hover {
+  color: #eee4e4;
+}
+
+ /* fin nav-bar */
+
+.col-lg-offset-6 {
+  margin-left: 50%;
+}
+
+body{
+  padding-left: 5%;
+  padding-right:5%;
+}
+
+/* CSS used here will be applied after bootstrap.css */
+.badge-notify{
+  background:red;
+  position:relative;
+  top: -10px;
+  left: -30px;
+}
+
+IMG.displayed {
+  display: block;
+  margin-left: auto;
+  margin-right: auto 
+}

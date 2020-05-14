@@ -6,6 +6,7 @@ import cv2
 import time
 import algorithm_variables as algo
 import envoimail
+import pickle
 
 tf.disable_v2_behavior()
 
@@ -35,6 +36,19 @@ nom_video = ""
 nom_photo = ""
 cpt_fin_mouvement = -1
 id=0
+
+# Récupération du fichier d'entrainement
+recognizer=cv2.face.LBPHFaceRecognizer_create()
+recognizer.read("trainner.yml")
+id_image=0
+color_info=(255, 255, 255)
+color_ko=(0, 0, 255)
+color_ok=(0, 255, 0)
+
+# Récupération des labels des personnes connues
+with open("labels.pickle", "rb") as f:
+    og_labels=pickle.load(f)
+    labels={v:k for k, v in og_labels.items()}
 
 
 # variables parametrables
@@ -101,23 +115,46 @@ with detection_graph.as_default():
                         #txt = "{:s}:{:3.0%}".format(labels[classes[objet]], scores[objet])
                         #cv2.putText(frame, txt, (xmin, ymin - 5), cv2.FONT_HERSHEY_PLAIN, 1, color_infos, 2)
 
+                    # S'il s'agit d'une personne
                     if classes[objet] == 1:
 
+                        # TODO: Timer de x secondes avant d'envoyer une notif ici
+                        tickmark = cv2.getTickCount()
                         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                         # détecte des objets de différentes tailles dans l'image d'entrée.
                         # les objets détectés sont renvoyés sous forme de liste de rectangles.
                         face = face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=4,
                                                              minSize=(min_size, min_size))
                         for x, y, w, h in face:
-                            # Si le visage est
+                            # Si le visage est compris dans la zone de détection de la personne
                             if x>=xmin and x+w<=xmax and y>=ymin and y+h<=ymax:
-                                cv2.imwrite("{}/p-{:d}.png".format(img_non_classees, id), frame[y:y + h, x:x + w])
+                                # TODO: Dans le if ou le else (connu ou non sur la frame) mettre la condition de notif
+                                # à étaler sur plusieurs frames pour être sûr ? En discussion
+                                roi_gray = cv2.resize(gray[y:y + h, x:x + w], (algo.min_size, algo.min_size))
+                                id_, conf = recognizer.predict(roi_gray)
+                                # TODO: supprimer les couleurs & labels qui ne servent que pour nos tests
+                                if conf <= 95:
+                                    color = color_ok
+                                    name = labels[id_]
+                                else:
+                                    color = color_ko
+                                    name = "Inconnu"
+                                    fichier_photo = None
+                                    nom_photo = ""
+                                label = name + " " + '{:5.2f}'.format(conf)
+                                cv2.putText(frame, label, (x, y - 10), cv2.FONT_HERSHEY_DUPLEX, 1, color_info, 1,
+                                            cv2.LINE_AA)
+                                #cv2.imwrite("{}/p-{:d}.png".format(img_non_classees, id), frame[y:y + h, x:x + w])
                                 # TODO: supprimer la création des rectangles qui ne sert que pour nos tests
                                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
                                 id += 1
 
                     if classes[objet] in {16, 17, 18, 19, 20, 21, 22, 23, 24, 25}:  # si un animal est détecté
-
+                        # Une hashmap par quadruplet de coordonnées dont la distance avec la frame n+1 est comparée avec celle des autres
+                        # coordonnées des hashmap du même type d'objet
+                        # Exemple de la Hashmap : {1 => {(2, 5, 14, 19) => 40, (50,59,62,72) => 35}, 16 =>}
+                        #{"person" => {(xmin1, xmax1, ymin1, ymax1) => cpt1, (xmin2, xmax2, ymin2, ymax2) => cpt2},
+                        #"cat" => {(xmin3, xmax3, ymin3, ymax3) => cpt3}}
                         # TODO???: ajouter un controle pour tester si le chat apparait sur plusieurs frames
                         #  avant d'enregistrer l'image pour éviter les faux positifs
 

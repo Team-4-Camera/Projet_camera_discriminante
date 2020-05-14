@@ -21,7 +21,7 @@ while True:
     ret, frame=cap.read()
     tickmark=cv2.getTickCount()
     gray=cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces=face_cascade.detectMultiScale(gray, scaleFactor=1.05,minNeighbors=4, minSize=(c.min_size, c.min_size))
+    faces=face_cascade.detectMultiScale(gray, scaleFactor=1.05,minNeighbors=4, minSize=(algo.min_size, algo.min_size))
     for (x, y, w, h) in faces:
         roi_gray=cv2.resize(gray[y:y+h, x:x+w], (algo.min_size, algo.min_size))
         id_, conf=recognizer.predict(roi_gray)

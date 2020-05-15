@@ -1,3 +1,5 @@
+import pickle
+
 labels = {
     1: "person",
     2: "bicycle",
@@ -95,6 +97,14 @@ switcher = {
 }
 
 chemin_animaux = "photos/enregistrement_journalier/animaux/"
+modele_detection = 'ssd_mobilenet_v2_coco_2018_03_29'
+chemin_graphe = modele_detection + '/frozen_inference_graph.pb'
+
+confirmation_detection = 3  # un compteur d'images avant de confirmer la détection des objets sur l'image
+precision_retenue = 0.50  # l'indice de confiance minimum pour détecter un objet
+fin_mouvement = 40  # le nombre d'images sans détection avant de couper la vidéo
+
+dir_videos = "c:\\enregistrements\\"  # le répertoire dans lequel sont enregistrés les vidéos
 
 # taille minimum de l'image
-min_size=70
+min_size = 70

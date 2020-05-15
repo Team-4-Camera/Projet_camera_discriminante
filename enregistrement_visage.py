@@ -1,7 +1,6 @@
 import cv2
 import sys
 import os
-import common as c
 
 # le fichier doit être appelé comme suit
 # python enregistrement_visage.py XXX.mp4 YYY
@@ -11,15 +10,14 @@ face_cascade = cv2.CascadeClassifier("./haarcascade_frontalface_alt2.xml")
 # cette utilisation par arguments passés ne permet plus l'utilisation avec une cam de l'ordinateur
 # il faut donner une vidéo en paramètre
 cap = cv2.VideoCapture(sys.argv[1])
-img_non_classees = 'photos/personnes_connues/' + sys.argv[2]
+chemin_enregistrement = 'photos/personnes_connues/' + sys.argv[2]
 
 # Variable paramétrable
 # définit le nombre d'images qu'on laisse passer entre deux enregistrements d'images quand on lit une vidéo
 entre_deux_images = 15
 
-
-if not os.path.isdir(img_non_classees):
-    os.mkdir(img_non_classees)
+if not os.path.isdir(chemin_enregistrement):
+    os.mkdir(chemin_enregistrement)
 
 id = 0
 while True:
@@ -31,7 +29,7 @@ while True:
     # les objets détectés sont renvoyés sous forme de liste de rectangles.
     face = face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=4, minSize=(c.min_size, c.min_size))
     for x, y, w, h in face:
-        cv2.imwrite("{}/p-{:d}.png".format(img_non_classees, id), frame[y:y + h, x:x + w])
+        cv2.imwrite("{}/p-{:d}.png".format(chemin_enregistrement, id), frame[y:y + h, x:x + w])
         # TODO: supprimer la création des rectangles qui ne sert que pour nos tests
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
         id += 1
@@ -50,3 +48,4 @@ while True:
 cap.release()
 # TODO: supprimer la destruction de la fenetre qui ne sert que pour nos tests
 cv2.destroyAllWindows()
+# TODO: supprimer la vidéo après le traitement

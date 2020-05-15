@@ -1,75 +1,76 @@
-import sys
 import os
 import numpy as np
 import tensorflow.compat.v1 as tf
 import cv2
 import time
-import algorithm_variables as algo
-import envoimail
-import pickle
+import variables_algo as var_algo
+import envoi_mail
+#import envoi_sms
 
 tf.disable_v2_behavior()
 
-# le fichier doit être appelé comme suit
-# python enregistrement_visage.py XXX.mp4 YYY
-# XXX étant le nom de la vidéo et YYY le nom du répertoire dans lequel on stocke les photos (robin par exemple)
-
 face_cascade = cv2.CascadeClassifier("./haarcascade_frontalface_alt2.xml")
 
-labels = algo.labels
+labels = var_algo.labels
+chemin_animaux = var_algo.chemin_animaux
+switcher = var_algo.switcher
+min_size = var_algo.min_size
+modele_detection = var_algo.modele_detection
+chemin_graphe = var_algo.chemin_graphe
+dir_videos = var_algo.dir_videos
+precision_retenue = var_algo.precision_retenue
+fin_mouvement = var_algo.fin_mouvement
+confirmation_detection = var_algo.confirmation_detection
 
-chemin_animaux = algo.chemin_animaux
-switcher = algo.switcher
-min_size = algo.min_size
-# Répertoire d'enregistrement des photos des personnes à reconnaître
-img_non_classees = 'photos/personnes_connues/'
-# Vérification de l'existence du répertoire
-if not os.path.isdir(img_non_classees):
-    os.mkdir(img_non_classees)
-
-MODEL_NAME = 'ssd_mobilenet_v2_coco_2018_03_29'
-PATH_TO_FROZEN_GRAPH = MODEL_NAME + '/frozen_inference_graph.pb'
-color_infos = (255, 255, 0)
 fichier_video = None
 fichier_photo = None
 nom_video = ""
 nom_photo = ""
 cpt_fin_mouvement = -1
-id=0
+cpt_confirmation_detection = confirmation_detection
+nb_objets_precedent = -1
+nb_objets = 0
+classes = []
+boxes = []
+scores = []
 
 # Récupération du fichier d'entrainement
-recognizer=cv2.face.LBPHFaceRecognizer_create()
+recognizer = cv2.face.LBPHFaceRecognizer_create()
 recognizer.read("trainner.yml")
-id_image=0
-color_info=(255, 255, 255)
-color_ko=(0, 0, 255)
-color_ok=(0, 255, 0)
+id_image = 0
+color_infos = (255, 255, 255)
+color_ko = (0, 0, 255)
+color_ok = (0, 255, 0)
 
-# Récupération des labels des personnes connues
-with open("labels.pickle", "rb") as f:
-    og_labels=pickle.load(f)
-    labels={v:k for k, v in og_labels.items()}
-
-
-# variables parametrables
-dir_videos = "c:\\enregistrements\\"  # le répertoire dans lequel sont enregistrés les vidéos
-precision_retenue = 0.50  # l'indice de confiance minimum pour détecter un objet
-fin_mouvement = 40  # le nombre d'images sans détection avant de couper la vidéo
-source_video = "Hu.mp4"  # la source de la vidéo, 0 pour cam intégré (sys.argv[] cast en int si argument), nom d'un fichier pour vidéo
+source_video = "video1.mp4"  # la source de la vidéo, 0 pour cam intégré (sys.argv[] cast en int si argument), nom d'un fichier pour vidéo
 destinataire = "xxxxxx@xxx.x"  # l'adresse mail du destinataire à qui sera envoyé le mail
+
+
+# *************************** Partie Fonctions *************************************
+
+def recupererNbObjetsPersonneAnimaux(output_dict):
+    nb_objets = 0
+    for objet in range(int(output_dict['num_detections'])):  # on parcourt tous les objets détectés sur l'image
+        local_classes = output_dict['detection_classes'][0].astype(np.uint8)  # le tableau avec les identifiants
+        local_scores = output_dict['detection_scores'][0]  # indice de confiance renvoyé pour chaque objet
+        if local_scores[objet] > precision_retenue \
+                and local_classes[objet] in {1, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}:
+            nb_objets = nb_objets + 1
+
+    return nb_objets
 
 
 # *************************** Partie IA tensorflow *************************************
 
-# Lecture du modèle qui a déjà été entrainée avec le dataset COCO
+# lecture du modèle qui a déjà été entrainée avec le dataset COCO
 detection_graph = tf.Graph()
 with detection_graph.as_default():
     od_graph_def = tf.GraphDef()
-    # Recupère le modèle
-    with tf.gfile.GFile(PATH_TO_FROZEN_GRAPH, 'rb') as fid:
+    # recupère le modèle
+    with tf.gfile.GFile(chemin_graphe, 'rb') as fid:
         serialized_graph = fid.read()
         od_graph_def.ParseFromString(serialized_graph)
-        # importer od_graph_def dans le graph courant
+        # importe od_graph_def dans le graph courant
         tf.import_graph_def(od_graph_def, name='')
 
 with detection_graph.as_default():
@@ -95,15 +96,32 @@ with detection_graph.as_default():
             hauteur, largeur, nbr_couche = frame.shape
             output_dict = sess.run(tensor_dict, feed_dict={
                 image_tensor: np.expand_dims(frame, 0)})  # donne notre image au réseau de neurones
-            nbr_object = int(output_dict['num_detections'])  # nombre d'objets présents
-            classes = output_dict['detection_classes'][0].astype(np.uint8)  # le tableau avec les identifiants
-            boxes = output_dict['detection_boxes'][0]  # les coordonnées localisant les objets
-            scores = output_dict['detection_scores'][0]  # indice de confiance renvoyé pour chaque objet
 
-            for objet in range(nbr_object):  # on parcourt tous les objets détectés sur l'image
+            # récupére le nombre d'objets personne et animaux présents sur la frame
+            nb_objets_personne_animaux = recupererNbObjetsPersonneAnimaux(output_dict)
+
+            # on décremente le compteur si on constate le même nombre d'objets en n et n-1 et qu'il est supérieur à 0
+            if nb_objets_personne_animaux == nb_objets_precedent:
+                if cpt_confirmation_detection > 0:
+                    cpt_confirmation_detection = cpt_confirmation_detection - 1
+            # sinon on réinitialise le compteur si on constate une différence de nombre d'objets
+            else:
+                cpt_confirmation_detection = confirmation_detection
+                nb_objets_precedent = nb_objets_personne_animaux
+
+            # si le compteur est égal à 0, on met à jour les objets présents sur la frame
+            if cpt_confirmation_detection == 0:
+                nb_objets = int(output_dict['num_detections'])  # nombre d'objets présents
+                classes = output_dict['detection_classes'][0].astype(np.uint8)  # le tableau avec les identifiants
+                boxes = output_dict['detection_boxes'][0]  # les coordonnées localisant les objets
+                scores = output_dict['detection_scores'][0]  # indice de confiance renvoyé pour chaque objet
+
+            for objet in range(nb_objets):  # on parcourt tous les objets détectés sur l'image
+
                 ymin, xmin, ymax, xmax = boxes[objet]
 
-                if scores[objet] > precision_retenue:  # si le score est supérieur au paramétrage
+                # si le score est supérieur au paramétrage
+                if scores[objet] > precision_retenue:
                     if classes[objet] in {1, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}:
                         # TODO: supprimer les lignes suivantes qui ne nous servent que pour les tests
                         height, width = frame.shape[:2]
@@ -111,9 +129,9 @@ with detection_graph.as_default():
                         xmax = int(xmax * width)
                         ymin = int(ymin * height)
                         ymax = int(ymax * height)
-                        #cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color_infos, 1)
-                        #txt = "{:s}:{:3.0%}".format(labels[classes[objet]], scores[objet])
-                        #cv2.putText(frame, txt, (xmin, ymin - 5), cv2.FONT_HERSHEY_PLAIN, 1, color_infos, 2)
+                        cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color_infos, 1)
+                        txt = "{:s}:{:3.0%}".format(labels[classes[objet]], scores[objet])
+                        cv2.putText(frame, txt, (xmin, ymin - 5), cv2.FONT_HERSHEY_PLAIN, 1, color_infos, 2)
 
                     # S'il s'agit d'une personne
                     if classes[objet] == 1:
@@ -127,10 +145,10 @@ with detection_graph.as_default():
                                                              minSize=(min_size, min_size))
                         for x, y, w, h in face:
                             # Si le visage est compris dans la zone de détection de la personne
-                            if x>=xmin and x+w<=xmax and y>=ymin and y+h<=ymax:
+                            if x >= xmin and x + w <= xmax and y >= ymin and y + h <= ymax:
                                 # TODO: Dans le if ou le else (connu ou non sur la frame) mettre la condition de notif
                                 # à étaler sur plusieurs frames pour être sûr ? En discussion
-                                roi_gray = cv2.resize(gray[y:y + h, x:x + w], (algo.min_size, algo.min_size))
+                                roi_gray = cv2.resize(gray[y:y + h, x:x + w], (var_algo.min_size, var_algo.min_size))
                                 id_, conf = recognizer.predict(roi_gray)
                                 # TODO: supprimer les couleurs & labels qui ne servent que pour nos tests
                                 if conf <= 95:
@@ -142,24 +160,27 @@ with detection_graph.as_default():
                                     fichier_photo = None
                                     nom_photo = ""
                                 label = name + " " + '{:5.2f}'.format(conf)
-                                cv2.putText(frame, label, (x, y - 10), cv2.FONT_HERSHEY_DUPLEX, 1, color_info, 1,
+                                cv2.putText(frame, label, (x, y - 10), cv2.FONT_HERSHEY_DUPLEX, 1, color_infos, 1,
                                             cv2.LINE_AA)
-                                #cv2.imwrite("{}/p-{:d}.png".format(img_non_classees, id), frame[y:y + h, x:x + w])
                                 # TODO: supprimer la création des rectangles qui ne sert que pour nos tests
                                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
-                                id += 1
 
                     if classes[objet] in {16, 17, 18, 19, 20, 21, 22, 23, 24, 25}:  # si un animal est détecté
                         # Une hashmap par quadruplet de coordonnées dont la distance avec la frame n+1 est comparée avec celle des autres
                         # coordonnées des hashmap du même type d'objet
                         # Exemple de la Hashmap : {1 => {(2, 5, 14, 19) => 40, (50,59,62,72) => 35}, 16 =>}
-                        #{"person" => {(xmin1, xmax1, ymin1, ymax1) => cpt1, (xmin2, xmax2, ymin2, ymax2) => cpt2},
-                        #"cat" => {(xmin3, xmax3, ymin3, ymax3) => cpt3}}
-                        # TODO???: ajouter un controle pour tester si le chat apparait sur plusieurs frames
-                        #  avant d'enregistrer l'image pour éviter les faux positifs
+                        # {"person" => {(xmin1, xmax1, ymin1, ymax1) => cpt1, (xmin2, xmax2, ymin2, ymax2) => cpt2},
+                        # "cat" => {(xmin3, xmax3, ymin3, ymax3) => cpt3}}
 
-                        # recupère le répertoire où enregistrer la photo de l'animal détecté
+                        # récupére le répertoire concernant l'animal détecté
                         dir_photos = chemin_animaux + switcher.get(classes[objet]) + "/"
+
+                        # crée le repertoire du jour courant s'il n'existe pas
+                        if not os.path.isdir(dir_photos + time.strftime("%Y_%m_%d")):
+                            os.mkdir(dir_photos + time.strftime("%Y_%m_%d"))
+
+                        # met à jour le répertoire ou il faut enregistrer l'image de l'animal
+                        dir_photos = dir_photos + time.strftime("%Y_%m_%d") + "/"
 
                         # on crée un fichier photo
                         if fichier_photo is None:

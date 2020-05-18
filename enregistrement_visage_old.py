@@ -1,6 +1,5 @@
 import cv2
 import operator
-import algorithm_variables as algo
 
 face_cascade=cv2.CascadeClassifier("./haarcascade_frontalface_alt2.xml")
 # Create a VideoCapture object and read from input file 

@@ -19,8 +19,8 @@ tf.disable_v2_behavior()
 face_cascade = cv2.CascadeClassifier("./haarcascade_frontalface_alt2.xml")
 
 labels = var_algo.labels
+id_animal = 91
 chemin_animaux = var_algo.chemin_animaux
-switcher = var_algo.switcher
 min_size = var_algo.min_size
 modele_detection = var_algo.modele_detection
 chemin_graphe = var_algo.chemin_graphe
@@ -72,8 +72,7 @@ def recupererNbObjetsPersonneAnimaux(output_dict):
 
 def majClassesHashmap(output_dict):
 
-    coord_hashmap = {1: [], 16: [], 17: [], 18: [], 19: [],
-                       20: [], 21: [], 22: [], 23: [], 24: [], 25: []}
+    coord_hashmap = {1: [], 91: []}
 
     for objet in range(int(output_dict['num_detections'])):  # on parcourt tous les objets détectés sur l'image
 
@@ -81,12 +80,18 @@ def majClassesHashmap(output_dict):
         local_boxes = output_dict['detection_boxes'][0]  # les coordonnées localisant les objets
         local_scores = output_dict['detection_scores'][0]  # indice de confiance renvoyé pour chaque objet
 
-        if local_classes[objet] in {1, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25} and local_scores[objet] > precision_retenue:
+        if local_classes[objet] == 1 and local_scores[objet] > precision_retenue:
 
             classes_id = local_classes[objet]
             tmp_ymin, tmp_xmin, tmp_ymax, tmp_xmax = local_boxes[objet]
             tmp_coord = (tmp_xmin, tmp_xmax, tmp_ymin, tmp_ymax)
             coord_hashmap[classes_id].append(tmp_coord)
+        elif local_classes[objet] in {16, 17, 18, 19, 20, 21, 22, 23, 24, 25} and local_scores[objet] > precision_retenue:
+            classes_id = id_animal
+            tmp_ymin, tmp_xmin, tmp_ymax, tmp_xmax = local_boxes[objet]
+            tmp_coord = (tmp_xmin, tmp_xmax, tmp_ymin, tmp_ymax)
+            coord_hashmap[classes_id].append(tmp_coord)
+
 
     for id_classes, coord_liste in coord_hashmap.items():
         majValeurHashmap(id_classes, coord_liste)
@@ -282,7 +287,7 @@ with detection_graph.as_default():
                                 fichier_photo = value[2]
 
                         # récupére le répertoire concernant l'animal détecté
-                        dir_photos = chemin_animaux + switcher.get(classes[objet]) + "/"
+                        dir_photos = chemin_animaux
 
                         # crée le repertoire du jour courant s'il n'existe pas
                         if not os.path.isdir(dir_photos + time.strftime("%Y_%m_%d")):
@@ -295,7 +300,7 @@ with detection_graph.as_default():
                         if fichier_photo is None:
                             nom_photo = time.strftime("%Y_%m_%d_%H_%M_%S") + ".png"
                             fichier_photo = dir_photos + nom_photo
-                            classes_hashmap[classes[objet]][id_objet][2] = fichier_photo
+                            classes_hashmap[id_animal][id_objet][2] = fichier_photo
                             cv2.imwrite(fichier_photo, frame)
 
                         classes_hashmap[classes[objet]][id_objet][1] = fin_mouvement  # on initialise ou réinitialise le compteur

@@ -2,7 +2,7 @@ import cv2
 import os
 import numpy as np
 import pickle
-import algorithm_variables as algo
+import variables_algo as algo
 
 image_dir="photos/"
 current_id=0

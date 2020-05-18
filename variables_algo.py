@@ -80,20 +80,8 @@ labels = {
     87: "scissors",
     88: "teddy bear",
     89: "hair drier",
-    90: "toothbrush"
-}
-
-switcher = {
-    16: "oiseaux",
-    17: "chats",
-    18: "chiens",
-    19: "chevaux",
-    20: "moutons",
-    21: "vaches",
-    22: "elephants",
-    23: "ours",
-    24: "zebres",
-    25: "girafes"
+    90: "toothbrush",
+    91: "animal"
 }
 
 chemin_animaux = "photos/enregistrement_journalier/animaux/"

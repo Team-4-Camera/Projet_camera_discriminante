@@ -85,9 +85,9 @@ labels = {
 }
 
 # le répertoire dans lequel sont enregistrés les photos des animaux
-chemin_animaux = "photos/enregistrement_journalier/animaux/"
+chemin_animaux = "media/enregistrement_journalier/animaux/"
 # le répertoire dans lequel sont enregistrés les vidéos des humains
-chemin_humains = "photos/enregistrement_journalier/humains/"
+chemin_humains = "media/enregistrement_journalier/humains/"
 # le modèle COCO utilisé pour la détection des personnes et des animaux
 modele_detection = 'ssd_mobilenet_v2_coco_2018_03_29'
 # son graphe associé
@@ -99,6 +99,8 @@ confirmation_detection = 3
 precision_retenue = 0.50
 # le nombre d'images sans détection avant de couper la vidéo
 fin_mouvement = 40
+# le nombre d'images que comportera la vidéo
+longueur_video = 160
 
 # taille minimum de l'image
 min_size = 70

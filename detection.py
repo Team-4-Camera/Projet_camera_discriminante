@@ -31,6 +31,7 @@ chemin_graphe = var_algo.chemin_graphe
 chemin_humains = var_algo.chemin_humains
 precision_retenue = var_algo.precision_retenue
 fin_mouvement = var_algo.fin_mouvement
+longueur_video = var_algo.longueur_video
 confirmation_detection = var_algo.confirmation_detection
 
 fichier_video = None
@@ -130,7 +131,8 @@ def majValeurHashmap(id_classes, coord_liste):
             coord_liste.remove(coord_plus_proches)
             new_value_hashmap[key_value_hashmap] = [coord_plus_proches, value_hashmap[key_value_hashmap][1],
                                                     value_hashmap[key_value_hashmap][2],
-                                                    value_hashmap[key_value_hashmap][3]]
+                                                    value_hashmap[key_value_hashmap][3],
+                                                    value_hashmap[key_value_hashmap][4]]
         elif value_hashmap[key_value_hashmap][1] >= 0:
             new_value_hashmap[key_value_hashmap] = value_hashmap[key_value_hashmap]
 
@@ -139,7 +141,7 @@ def majValeurHashmap(id_classes, coord_liste):
     if len(coord_liste) > 0:
         for coord in coord_liste:
             id_disponible = hashmapIdDisponible(value_hashmap)
-            value_hashmap[id_disponible] = [coord, fin_mouvement, None, False]
+            value_hashmap[id_disponible] = [coord, fin_mouvement, None, False, longueur_video]
 
     classes_hashmap[id_classes] = value_hashmap
 
@@ -167,18 +169,18 @@ def recupererInfosObjet(coord, classe):
     local_cpt_fin_mouvement = None
     local_fichier_photo = None
 
-    for key, value in classes_hashmap[classe].items():
-        if value[0] == local_coord:
-            local_id_objet = key
-            local_cpt_fin_mouvement = value[1]
-            local_fichier_photo = value[2]
+    for id_obj, attribut_obj in classes_hashmap[classe].items():
+        if attribut_obj[0] == local_coord:
+            local_id_objet = id_obj
+            local_cpt_fin_mouvement = attribut_obj[1]
+            local_fichier_photo = attribut_obj[2]
 
     return local_id_objet, local_cpt_fin_mouvement, local_fichier_photo
 
 
 # *************************** Partie IA tensorflow *************************************
 
-# lecture du modèle qui a déjà été entrainée avec le dataset COCO
+# lecture du modèle qui a déjà été entrainé avec le dataset COCO
 detection_graph = tf.Graph()
 with detection_graph.as_default():
     od_graph_def = tf.GraphDef()
@@ -191,7 +193,7 @@ with detection_graph.as_default():
 
 with detection_graph.as_default():
     with tf.Session() as sess:
-        cap = cv2.VideoCapture(source_video)  # récupére les images de la source
+        cap = cv2.VideoCapture(source_video)  # récupère les images de la source
         ops = tf.get_default_graph().get_operations()  # retourne la liste des opérations dans le graphe
         all_tensor_names = {output.name for op in ops for output in op.outputs}
         tensor_dict = {}
@@ -213,7 +215,7 @@ with detection_graph.as_default():
             output_dict = sess.run(tensor_dict, feed_dict={
                 image_tensor: np.expand_dims(frame, 0)})  # donne notre image au réseau de neurones
 
-            # récupére le nombre d'objets personne et animaux présents sur la frame
+            # récupère le nombre d'objets personne et animaux présents sur la frame
             nb_objets_personne_animaux = recupererNbObjetsPersonneAnimaux(output_dict)
 
             # on décremente le compteur si on constate le même nombre d'objets en n et n-1 et qu'il est supérieur à 0
@@ -271,7 +273,7 @@ with detection_graph.as_default():
 
                         id_objet, cpt_fin_mouvement, fichier_video = recupererInfosObjet(boxes[objet], classes[objet])
 
-                        # récupére le répertoire concernant la personne détectée
+                        # récupère le répertoire concernant la personne détectée
                         dir_videos = chemin_humains
 
                         # crée le repertoire du jour courant s'il n'existe pas
@@ -291,8 +293,9 @@ with detection_graph.as_default():
                         #else:
                         #    classes_hashmap[classes[objet]][id_objet][2] = fichier_video
 
-                        # on initialise ou réinitialise le compteur
+                        # réinitialise le compteur
                         classes_hashmap[classes[objet]][id_objet][1] = fin_mouvement
+
 
                         # détection des visages
                         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -325,7 +328,7 @@ with detection_graph.as_default():
 
                         id_objet, cpt_fin_mouvement, fichier_photo = recupererInfosObjet(boxes[objet], id_animal)
 
-                        # récupére le répertoire concernant l'animal détecté
+                        # récupère le répertoire concernant l'animal détecté
                         dir_photos = chemin_animaux
 
                         # crée le repertoire du jour courant s'il n'existe pas
@@ -353,8 +356,9 @@ with detection_graph.as_default():
             for key, value in classes_hashmap.items():
                 if key == 1:
                     for key2, value2 in classes_hashmap[key].items():
-                        # si la personne est hors écran depuis fin_mouvement frames et qu'elle n'a pas été reconnue
-                        if value2[1] == 0:
+                        # si la personne est hors écran depuis fin_mouvement frames ou sur l'écran depuis longueur_video frames
+                        if value2[1] == 0 or value2[4] == 0:
+                            # et qu'elle n'a pas été reconnue
                             if not(value2[3]):
                                 nom_video = value2[2].split("/")[-1]
                                 dir_videos = value2[2].replace(nom_video, "")
@@ -367,7 +371,9 @@ with detection_graph.as_default():
                                 os.remove(value2[2])
                                 fichier_video = None
 
+
                         value2[1] = value2[1] - 1
+                        value2[4] = value2[4] - 1
 
                 # si l'animal n'a pas été détecté depuis cpt_fin_mouvement frame, on envoie un mail et on réinitialise
                 if key in {16, 17, 18, 19, 20, 21, 22, 23, 24, 25}:

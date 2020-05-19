@@ -84,15 +84,21 @@ labels = {
     91: "animal"
 }
 
+# le répertoire dans lequel sont enregistrés les photos des animaux
 chemin_animaux = "photos/enregistrement_journalier/animaux/"
+# le répertoire dans lequel sont enregistrés les vidéos des humains
+chemin_humains = "photos/enregistrement_journalier/humains/"
+# le modèle COCO utilisé pour la détection des personnes et des animaux
 modele_detection = 'ssd_mobilenet_v2_coco_2018_03_29'
+# son graphe associé
 chemin_graphe = modele_detection + '/frozen_inference_graph.pb'
 
-confirmation_detection = 3  # un compteur d'images avant de confirmer la détection des objets sur l'image
-precision_retenue = 0.50  # l'indice de confiance minimum pour détecter un objet
-fin_mouvement = 40  # le nombre d'images sans détection avant de couper la vidéo
-
-dir_videos = "c:\\enregistrements\\"  # le répertoire dans lequel sont enregistrés les vidéos
+# un compteur d'images avant de confirmer la détection des objets sur l'image
+confirmation_detection = 3
+# l'indice de confiance minimum pour détecter un objet
+precision_retenue = 0.50
+# le nombre d'images sans détection avant de couper la vidéo
+fin_mouvement = 40
 
 # taille minimum de l'image
 min_size = 70

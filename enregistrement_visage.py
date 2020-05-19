@@ -1,6 +1,7 @@
 import cv2
 import sys
 import os
+import variables_algo
 
 # le fichier doit être appelé comme suit
 # python enregistrement_visage.py XXX.mp4 YYY
@@ -9,8 +10,10 @@ import os
 face_cascade = cv2.CascadeClassifier("./haarcascade_frontalface_alt2.xml")
 # cette utilisation par arguments passés ne permet plus l'utilisation avec une cam de l'ordinateur
 # il faut donner une vidéo en paramètre
-cap = cv2.VideoCapture(sys.argv[1])
-chemin_enregistrement = 'photos/personnes_connues/' + sys.argv[2]
+#cap = cv2.VideoCapture(sys.argv[1])
+cap = cv2.VideoCapture(0)
+#chemin_enregistrement = 'photos/personnes_connues/' + sys.argv[2]
+chemin_enregistrement = 'photos/personnes_connues/robin/'
 
 # Variable paramétrable
 # définit le nombre d'images qu'on laisse passer entre deux enregistrements d'images quand on lit une vidéo
@@ -27,7 +30,8 @@ while True:
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     # détecte des objets de différentes tailles dans l'image d'entrée.
     # les objets détectés sont renvoyés sous forme de liste de rectangles.
-    face = face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=4, minSize=(c.min_size, c.min_size))
+    face = face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=4,
+                                         minSize=(variables_algo.min_size, variables_algo.min_size))
     for x, y, w, h in face:
         cv2.imwrite("{}/p-{:d}.png".format(chemin_enregistrement, id), frame[y:y + h, x:x + w])
         # TODO: supprimer la création des rectangles qui ne sert que pour nos tests

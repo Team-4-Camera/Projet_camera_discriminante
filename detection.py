@@ -6,6 +6,8 @@ import time
 import variables_algo as var_algo
 import envoi_mail
 import logging
+import Personne
+import Animal
 import pickle
 
 # import envoi_sms
@@ -129,11 +131,23 @@ def majValeurHashmap(id_classes, coord_liste):
 
         if coord_plus_proches in coord_liste:
             coord_liste.remove(coord_plus_proches)
-            new_value_hashmap[key_value_hashmap] = [coord_plus_proches, value_hashmap[key_value_hashmap][1],
-                                                    value_hashmap[key_value_hashmap][2],
-                                                    value_hashmap[key_value_hashmap][3],
-                                                    value_hashmap[key_value_hashmap][4]]
-        elif value_hashmap[key_value_hashmap][1] >= 0:
+            # new_value_hashmap[key_value_hashmap] = [coord_plus_proches, value_hashmap[key_value_hashmap][1],
+            #                                         value_hashmap[key_value_hashmap][2],
+            #                                         value_hashmap[key_value_hashmap][3],
+            #                                         value_hashmap[key_value_hashmap][4]]
+            if id_classes == 1:
+                new_value_hashmap[key_value_hashmap] = Personne.Personne(coord_plus_proches,
+                                                        value_hashmap[key_value_hashmap].get_cpt_fin_mouvement(),
+                                                        value_hashmap[key_value_hashmap].get_chemin_fichier(),
+                                                        value_hashmap[key_value_hashmap].get_cpt_confirm_detection(),
+                                                        value_hashmap[key_value_hashmap].get_reconnu(),
+                                                        value_hashmap[key_value_hashmap].get_cpt_frame_video())
+            else:
+                new_value_hashmap[key_value_hashmap] = Animal.Animal(coord_plus_proches,
+                                                        value_hashmap[key_value_hashmap].get_cpt_fin_mouvement(),
+                                                        value_hashmap[key_value_hashmap].get_chemin_fichier(),
+                                                        value_hashmap[key_value_hashmap].get_cpt_confirm_detection())
+        elif value_hashmap[key_value_hashmap].get_cpt_fin_mouvement >= 0:
             new_value_hashmap[key_value_hashmap] = value_hashmap[key_value_hashmap]
 
     value_hashmap = new_value_hashmap
@@ -141,7 +155,10 @@ def majValeurHashmap(id_classes, coord_liste):
     if len(coord_liste) > 0:
         for coord in coord_liste:
             id_disponible = hashmapIdDisponible(value_hashmap)
-            value_hashmap[id_disponible] = [coord, fin_mouvement, None, False, longueur_video]
+            if id_classes == 1:
+                value_hashmap[id_disponible] = Personne.Personne(coord, fin_mouvement, None, 5, False, longueur_video)
+            else:
+                value_hashmap[id_disponible] = Animal.Animal(coord, fin_mouvement, None, 5)
 
     classes_hashmap[id_classes] = value_hashmap
 
@@ -169,11 +186,11 @@ def recupererInfosObjet(coord, classe):
     local_cpt_fin_mouvement = None
     local_fichier_photo = None
 
-    for id_obj, attribut_obj in classes_hashmap[classe].items():
-        if attribut_obj[0] == local_coord:
+    for id_obj, obj in classes_hashmap[classe].items():
+        if obj.get_coord() == local_coord:
             local_id_objet = id_obj
-            local_cpt_fin_mouvement = attribut_obj[1]
-            local_fichier_photo = attribut_obj[2]
+            local_cpt_fin_mouvement = obj.get_cpt_fin_mouvement()
+            local_fichier_photo = obj.get_chemin_fichier()
 
     return local_id_objet, local_cpt_fin_mouvement, local_fichier_photo
 
@@ -287,15 +304,14 @@ with detection_graph.as_default():
                         if fichier_video is None:
                             nom_fichier = time.strftime("%Y_%m_%d_%H_%M_%S") + ".avi"
                             fichier_video = dir_videos + nom_fichier
-                            classes_hashmap[classes[objet]][id_objet][2] = fichier_video
+                            classes_hashmap[classes[objet]][id_objet].set_fichier_video(fichier_video)
                             video = cv2.VideoWriter(fichier_video, cv2.VideoWriter_fourcc(*'DIVX'), 15,
                                                     (largeur, hauteur))
                         #else:
                         #    classes_hashmap[classes[objet]][id_objet][2] = fichier_video
 
                         # réinitialise le compteur
-                        classes_hashmap[classes[objet]][id_objet][1] = fin_mouvement
-
+                        classes_hashmap[classes[objet]][id_objet].set_cpt_fin_mouvement(fin_mouvement)
 
                         # détection des visages
                         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -314,7 +330,7 @@ with detection_graph.as_default():
                                     color = color_ok
                                     # name = labels[id_]
                                     #TODO: mettre en place un compteur pour confirmer la détection sur plusieurs frames ?
-                                    classes_hashmap[classes[objet]][id_objet][3] = True
+                                    classes_hashmap[classes[objet]][id_objet].set_reconnu(True)
                                 else:
                                     color = color_ko
                                     # name = "Inconnu"
@@ -342,50 +358,49 @@ with detection_graph.as_default():
                         if fichier_photo is None:
                             nom_photo = time.strftime("%Y_%m_%d_%H_%M_%S") + ".png"
                             fichier_photo = dir_photos + nom_photo
-                            classes_hashmap[id_animal][id_objet][2] = fichier_photo
+                            classes_hashmap[id_animal][id_objet].set_chemin_fichier(fichier_photo)
                             cv2.imwrite(fichier_photo, frame)
 
                         # on initialise ou réinitialise le compteur
-                        classes_hashmap[id_animal][id_objet][1] = fin_mouvement
+                        classes_hashmap[id_animal][id_objet].set_cpt_fin_mouvement(fin_mouvement)
 
             # on écrit dans la video tant que le compteur n'atteint pas 0
-            for key, value in classes_hashmap[1].items():
-                if value[1] > 0:
+            for id, obj in classes_hashmap[1].items():
+                if obj.get_cpt_fin_mouvement() > 0:
                     video.write(frame)
 
             for key, value in classes_hashmap.items():
                 if key == 1:
                     for key2, value2 in classes_hashmap[key].items():
                         # si la personne est hors écran depuis fin_mouvement frames ou sur l'écran depuis longueur_video frames
-                        if value2[1] == 0 or value2[4] == 0:
+                        if value2.get_cpt_fin_mouvement() == 0 or value2.get_cpt_frame_video() == 0:
                             # et qu'elle n'a pas été reconnue
-                            if not(value2[3]):
-                                nom_video = value2[2].split("/")[-1]
-                                dir_videos = value2[2].replace(nom_video, "")
+                            if not(value2.get_reconnu()):
+                                nom_video = value2.get_chemin_fichier().split("/")[-1]
+                                dir_videos = value2.get_chemin_fichier().replace(nom_video, "")
                                 envoi_mail.envoyermail(destinataire, "Intrusion",
                                                        "Une personne inconnue a été détectée", dir_videos, nom_video)
                                 video.release()
                                 fichier_video = None
                             else:
                                 video.release()
-                                os.remove(value2[2])
+                                os.remove(value2.get_chemin_fichier())
                                 fichier_video = None
 
-
-                        value2[1] = value2[1] - 1
-                        value2[4] = value2[4] - 1
+                        value2.set_cpt_fin_mouvement(value2.get_cpt_fin_mouvement - 1)
+                        value2.set_cpt_frame_video(value2.get_cpt_frame_video - 1)
 
                 # si l'animal n'a pas été détecté depuis cpt_fin_mouvement frame, on envoie un mail et on réinitialise
                 if key in {16, 17, 18, 19, 20, 21, 22, 23, 24, 25}:
                     for key2, value2 in classes_hashmap[key].items():
-                        if value2[1] == 0:  # cpt_fin_mouvement
-                            nom_photo = value2[2].split("/")[-1]
-                            dir_photos = value2[2].replace(nom_photo, "")
+                        if value2.get_cpt_fin_mouvement() == 0:  # cpt_fin_mouvement
+                            nom_photo = value2.get_chemin_fichier().split("/")[-1]
+                            dir_photos = value2.get_chemin_fichier().replace(nom_photo, "")
                             envoi_mail.envoyermail(destinataire, "Détection animal", "Un animal sauvage a été détecté",
                                                    dir_photos, nom_photo)
-                            value2[2] = None
+                            value2.set_chemin_fichier(None)
 
-                        value2[1] = value2[1] - 1
+                        value2.set_cpt_fin_mouvement(value2.get_cpt_fin_mouvement - 1)
 
             # TODO: supprimer l'affichage de la fenetre qui ne nous sert que pour les tests
             cv2.imshow('image', frame)

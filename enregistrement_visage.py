@@ -10,10 +10,8 @@ import variables_algo
 face_cascade = cv2.CascadeClassifier("./haarcascade_frontalface_alt2.xml")
 # cette utilisation par arguments passés ne permet plus l'utilisation avec une cam de l'ordinateur
 # il faut donner une vidéo en paramètre
-#cap = cv2.VideoCapture(sys.argv[1])
-cap = cv2.VideoCapture(0)
-#chemin_enregistrement = 'photos/personnes_connues/' + sys.argv[2]
-chemin_enregistrement = 'photos/personnes_connues/robin/'
+cap = cv2.VideoCapture(sys.argv[1])
+chemin_enregistrement = 'photos/personnes_connues/' + sys.argv[2]
 
 # Variable paramétrable
 # définit le nombre d'images qu'on laisse passer entre deux enregistrements d'images quand on lit une vidéo

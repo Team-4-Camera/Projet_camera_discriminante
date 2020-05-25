@@ -88,6 +88,8 @@ labels = {
 chemin_animaux = "media/enregistrement_journalier/animaux/"
 # le répertoire dans lequel sont enregistrés les vidéos des humains
 chemin_humains = "media/enregistrement_journalier/humains/"
+# le répertoire dans lequel sont enregistrées les photos de création de vidéo
+chemin_photos_temp = "media/photos_temp/"
 # le modèle COCO utilisé pour la détection des personnes et des animaux
 modele_detection = 'ssd_mobilenet_v2_coco_2018_03_29'
 # son graphe associé

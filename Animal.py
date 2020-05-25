@@ -1,4 +1,4 @@
-import EtreVivant
+from EtreVivant import EtreVivant
 
 
 class Animal(EtreVivant):

@@ -9,7 +9,7 @@ code      = ( sys.argv[2] )
 # Your Account Sid and Auth Token from twilio.com/console
 # DANGER! This is insecure. See http://twil.io/secure
 account_sid = 'ACe452c77962317112730133dfaea130fd'
-auth_token  = '2eeab39b09e865523a87255c02a2c4c7'
+auth_token  = '3af09c56a1967df682d6079b4cc12e03'
 client      = Client(account_sid, auth_token)
 
 message     = client.messages \

@@ -34,6 +34,7 @@ longueur_video = var_algo.longueur_video
 confirmation_detection = var_algo.confirmation_detection
 coord_pourcentage = var_algo.coord_pourcentage
 video_fps = var_algo.video_fps
+chemin_gestion = var_algo.chemin_gestion
 
 fichier_photo = None
 nom_video = ""
@@ -51,6 +52,7 @@ boxes = []
 scores = []
 largeur = 0
 hauteur = 0
+etat_appli = "true"
 
 # Récupération du fichier d'entrainement
 recognizer = cv2.face.LBPHFaceRecognizer_create()
@@ -61,7 +63,6 @@ color_ko = (0, 0, 255)
 color_ok = (0, 255, 0)
 
 source_video = "video1.mp4"  # la source de la vidéo, 0 pour cam intégré (sys.argv[] cast en int si argument), nom d'un fichier pour vidéo
-destinataire = "robin.lemancel@gmail.com"  # l'adresse mail du destinataire à qui sera envoyé le mail
 
 classes_hashmap = {1: {}, 91: {}}
 
@@ -256,6 +257,17 @@ def hashmapIdDisponible(hashmap):
     return id_disponible
 
 
+def majVariablesGestion():
+    fichier_gestion = open(chemin_gestion, "r")
+    contenu_fichier = fichier_gestion.read()
+    destinataire = contenu_fichier.split(";")[0]
+    telephone = contenu_fichier.split(";")[1]
+    etat_appli = contenu_fichier.split(";")[2]
+    fichier_gestion.close()
+
+    return destinataire, telephone, etat_appli
+
+
 # *************************** Partie IA tensorflow *************************************
 
 # Lecture du modèle qui a déjà été entrainé avec le dataset COCO
@@ -289,7 +301,11 @@ with detection_graph.as_default():
 
         # ************************* Partie exploitation de la vidéo ***********************************
 
-        while True:
+        while etat_appli == "true":
+
+            # Mise à jour des variables de gestion
+            destinataire, telephone, etat_appli = majVariablesGestion()
+
             # Lit les images provenant de la source vidéo
             ret, frame = cap.read()
             hauteur, largeur, nbr_couche = frame.shape

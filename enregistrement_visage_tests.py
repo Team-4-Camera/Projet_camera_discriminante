@@ -10,8 +10,7 @@ import variables_algo
 face_cascade = cv2.CascadeClassifier("./haarcascade_frontalface_alt2.xml")
 # cette utilisation par arguments passés ne permet plus l'utilisation avec une cam de l'ordinateur
 # il faut donner une vidéo en paramètre
-fichier_video = sys.argv[1]
-cap = cv2.VideoCapture(fichier_video)
+cap = cv2.VideoCapture(sys.argv[1])
 chemin_enregistrement = 'photos/personnes_connues/' + sys.argv[2]
 
 # Variable paramétrable
@@ -33,11 +32,22 @@ while True:
                                          minSize=(variables_algo.min_size, variables_algo.min_size))
     for x, y, w, h in face:
         cv2.imwrite("{}/p-{:d}.png".format(chemin_enregistrement, id), frame[y:y + h, x:x + w])
+        # TODO: supprimer la création des rectangles qui ne sert que pour nos tests
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
         id += 1
-
+    # TODO: supprimer la gestion des keys qui ne sert que pour nos tests
+    key = cv2.waitKey(1) & 0xFF
+    if key == ord('q'):
+        break
+    if key == ord('a'):
+        for cpt in range(100):
+            ret, frame = cap.read()
+    # TODO: supprimer l'affichage de la fenetre de la vidéo qui ne sert que pour nos tests
+    cv2.imshow('video', frame)
     for cpt in range(entre_deux_images):
         ret, frame = cap.read()
 
 cap.release()
-
-os.remove(fichier_video)
+# TODO: supprimer la destruction de la fenetre qui ne sert que pour nos tests
+cv2.destroyAllWindows()
+# TODO: supprimer la vidéo après le traitement

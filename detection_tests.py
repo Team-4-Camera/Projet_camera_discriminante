@@ -58,9 +58,11 @@ etat_appli = "true"
 recognizer = cv2.face.LBPHFaceRecognizer_create()
 recognizer.read("trainner.yml")
 id_image = 0
+color_infos = (255, 255, 255)
+color_ko = (0, 0, 255)
+color_ok = (0, 255, 0)
 
-# la source de la vidéo, 0 pour cam intégré (sys.argv[] cast en int si argument), nom d'un fichier pour vidéo
-source_video = 0
+source_video = "video1.mp4"  # la source de la vidéo, 0 pour cam intégré (sys.argv[] cast en int si argument), nom d'un fichier pour vidéo
 
 classes_hashmap = {1: {}, 91: {}}
 
@@ -323,11 +325,19 @@ with detection_graph.as_default():
                     cpt_fin_mouvement = objet.get_cpt_fin_mouvement()
                     cpt_confirmation_detection = objet.get_cpt_confirm_detection()
 
-                    height, width = frame.shape[:2]
-                    xmin = int(coord[0] * width)
-                    xmax = int(coord[1] * width)
-                    ymin = int(coord[2] * height)
-                    ymax = int(coord[3] * height)
+                    if objets_classe in {1, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}:
+
+                        # TODO: supprimer les lignes suivantes qui ne nous servent que pour les tests
+                        if cpt_confirmation_detection == 0:
+
+                            height, width = frame.shape[:2]
+                            xmin = int(coord[0] * width)
+                            xmax = int(coord[1] * width)
+                            ymin = int(coord[2] * height)
+                            ymax = int(coord[3] * height)
+                            cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color_infos, 1)
+                            txt = "{:s}".format(str(id_objet))
+                            cv2.putText(frame, txt, (xmin, ymin - 5), cv2.FONT_HERSHEY_PLAIN, 1, color_infos, 2)
 
                     # Traitement des personnes
                     if objets_classe == 1:
@@ -350,11 +360,16 @@ with detection_graph.as_default():
                                     # A étaler sur plusieurs frames pour être sûr ? En discussion
                                     roi_gray = cv2.resize(gray[y:y + h, x:x + w], (var_algo.min_size, var_algo.min_size))
                                     id_, conf = recognizer.predict(roi_gray)
-
+                                    # TODO: supprimer les couleurs & labels qui ne servent que pour nos tests
                                     if conf <= 95:
+                                        color = color_ok
                                         # TODO: mettre en place un compteur pour confirmer la détection sur plusieurs frames ?
                                         objet.set_reconnu(True)
                                         cpt_personnes_inconnues -= 1
+                                    else:
+                                        color = color_ko
+                                    # TODO: supprimer la création des rectangles qui ne sert que pour nos tests
+                                    cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
                             # Calcule le nombre d'images que l'objet est présent sur l'écran
                             if objet.get_num_premiere_photo() <= cpt_photos_temp:
@@ -364,9 +379,11 @@ with detection_graph.as_default():
 
                             # Si l'objet est disparu depuis fin_mouvement ou qu'on a atteint la taille max de la vidéo
                             if objet.get_cpt_fin_mouvement() == 0 or nb_frame == longueur_video - 1:
-
                                 # Si la personne n'a pas été reconnue et qu'il n'y a pas déjà eu notification
                                 # On crée un fichier vidéo
+
+                                print(objet.get_alerte_envoyee())
+
                                 if not(objet.get_reconnu()) and not(objet.get_alerte_envoyee()):
 
                                     # Récupére le répertoire concernant la personne détectée
@@ -446,6 +463,20 @@ with detection_graph.as_default():
 
                             objet.set_cpt_fin_mouvement(objet.get_cpt_fin_mouvement() - 1)
 
+            # TODO: supprimer l'affichage de la fenetre qui ne nous sert que pour les tests
+            cv2.imshow('image', frame)
+
+            # TODO: supprimer la gestion des keys qui ne nous sert que pour les tests
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord('a'):
+                for objet in range(500):
+                    ret, frame = cap.read()
+            if key == ord('z'):
+                for objet in range(100):
+                    ret, frame = cap.read()
+            if key == ord('q'):
+                break
+
             # Enregistrement des images tmp
             if cpt_personnes_inconnues != 0:
                 nom_photo = str(cpt_photos_temp) + ".png"
@@ -468,3 +499,5 @@ with detection_graph.as_default():
             cpt_photos_temp += 1
 
         cap.release()
+        # TODO: supprimer la destruction de fenetre qui ne nous sert que pour les tests
+        cv2.destroyAllWindows()

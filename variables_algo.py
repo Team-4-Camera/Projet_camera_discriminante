@@ -95,7 +95,7 @@ modele_detection = 'ssd_mobilenet_v2_coco_2018_03_29'
 # son graphe associé
 chemin_graphe = modele_detection + '/frozen_inference_graph.pb'
 # Chemin pour accéder au gestion.txt
-chemin_gestion = "C:/wamp64/www/camera_discriminante/Application_web_camera_discriminante/gestion_site/gestion.txt"
+chemin_gestion = "C:/wamp64/www/projet_camera/Application_web_camera_discriminante/gestion_site/gestion.txt"
 
 # un compteur d'images avant de confirmer la détection des objets sur l'image
 confirmation_detection = 5

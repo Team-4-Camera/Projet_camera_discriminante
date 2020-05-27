@@ -96,13 +96,17 @@ modele_detection = 'ssd_mobilenet_v2_coco_2018_03_29'
 chemin_graphe = modele_detection + '/frozen_inference_graph.pb'
 
 # un compteur d'images avant de confirmer la détection des objets sur l'image
-confirmation_detection = 3
+confirmation_detection = 5
 # l'indice de confiance minimum pour détecter un objet
 precision_retenue = 0.50
 # le nombre d'images sans détection avant de couper la vidéo
-fin_mouvement = 40
+fin_mouvement = 16
 # le nombre d'images que comportera la vidéo
 longueur_video = 160
+# Le pourcentage d'écart permis entre deux coordonnées pour être détecté comme un seul objet
+coord_pourcentage = 20
+# Les fps de la vidéo à enregistrer
+video_fps = 8
 
 # taille minimum de l'image
 min_size = 70

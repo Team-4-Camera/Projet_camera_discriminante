@@ -5,10 +5,6 @@ class Personne(EtreVivant):
 
     def __init__(self, coord, cpt_fin_mouvement, chemin_fichier, cpt_confirm_detection, reconnu, num_premiere_photo, alerte_envoyee):
         EtreVivant.__init__(self, coord, cpt_fin_mouvement, chemin_fichier, cpt_confirm_detection)
-        self.__coord = coord
-        self.__cpt_fin_mouvement = cpt_fin_mouvement
-        self.__chemin_fichier = chemin_fichier
-        self.__cpt_confirm_detection = cpt_confirm_detection
         self.__reconnu = reconnu
         self.__num_premiere_photo = num_premiere_photo
         self.__alerte_envoyee = alerte_envoyee

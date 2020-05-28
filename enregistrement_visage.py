@@ -12,7 +12,7 @@ face_cascade = cv2.CascadeClassifier("./haarcascade_frontalface_alt2.xml")
 # il faut donner une vidéo en paramètre
 fichier_video = sys.argv[1]
 cap = cv2.VideoCapture(fichier_video)
-chemin_enregistrement = 'photos/personnes_connues/' + sys.argv[2]
+chemin_enregistrement = 'media/personnes_connues/' + sys.argv[2]
 
 # Variable paramétrable
 # définit le nombre d'images qu'on laisse passer entre deux enregistrements d'images quand on lit une vidéo

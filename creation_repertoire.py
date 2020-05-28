@@ -6,7 +6,7 @@ tableau_chemins = [
     "media/personnes_connues",
     "media/enregistrement_journalier",
     "media/enregistrement_journalier/humains",
-    "media/enregistrement_journalier/animaux"
+    "media/enregistrement_journalier/animaux",
 ]
 
 for chemin in tableau_chemins:

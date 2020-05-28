@@ -1,5 +1,3 @@
-import pickle
-
 labels = {
     1: "person",
     2: "bicycle",

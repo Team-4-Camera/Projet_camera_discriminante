@@ -5,22 +5,14 @@ import cv2
 import time
 import variables_algo as var_algo
 import envoi_mail
+import envoi_sms
 import Personne
 import Animal
-import pickle
-import subprocess
-
-# import envoi_sms
-
-# with open("labels.pickle", "rb") as f:
-#     og_labels=pickle.load(f)
-#     labels={v:k for k, v in og_labels.items()}
 
 tf.disable_v2_behavior()
 
 face_cascade = cv2.CascadeClassifier("./haarcascade_frontalface_alt2.xml")
 
-labels = var_algo.labels
 id_animal = 91
 chemin_animaux = var_algo.chemin_animaux
 min_size = var_algo.min_size
@@ -36,20 +28,10 @@ coord_pourcentage = var_algo.coord_pourcentage
 video_fps = var_algo.video_fps
 chemin_gestion = var_algo.chemin_gestion
 
-fichier_photo = None
-nom_video = ""
-nom_photo = ""
-cpt_fin_mouvement = -1
-cpt_confirmation_detection = confirmation_detection
-nb_objets_precedent = -1
-nb_objets = 0
 # Nombre de personnes inconnues et n'ayant pas encore déclenché l'alerte sur l'écran
 cpt_personnes_inconnues = 0
 # De 0 à 160, indique le numéro de la photo actuelle
 cpt_photos_temp = 0
-classes = []
-boxes = []
-scores = []
 largeur = 0
 hauteur = 0
 etat_appli = "true"
@@ -57,30 +39,21 @@ etat_appli = "true"
 # Récupération du fichier d'entrainement
 recognizer = cv2.face.LBPHFaceRecognizer_create()
 recognizer.read("trainner.yml")
-id_image = 0
 
 # la source de la vidéo, 0 pour cam intégré (sys.argv[] cast en int si argument), nom d'un fichier pour vidéo
 source_video = 0
 
 classes_hashmap = {1: {}, 91: {}}
 
-# Création de répertoire
-if not os.path.isdir("media/"):
-    os.mkdir("media/")
-if not os.path.isdir(chemin_photos_temp):
-    os.mkdir(chemin_photos_temp)
-
-# Appel du script python de création de répertoire
-#subprocess.call("creation_repertoire.py")
-
-
 # *************************** Partie Fonctions *************************************
 
 
 def majClassesHashmap(output_dict):
-    """ Stocke les coordonnées des objets détectés sur l'image
-        Et lance le traitement pour mettre à jour la hashmap des objets
-        Param : output_dict """
+    """
+    Stocke les coordonnées des objets détectés sur l'image
+    Et lance le traitement pour mettre à jour la hashmap des objets
+    Param : output_dict : le dictionaire généré de la détection des objets sur une image
+    """
 
     coord_hashmap = {1: [], 91: []}
 
@@ -113,10 +86,12 @@ def majClassesHashmap(output_dict):
 
 
 def majValeurHashmap(id_classes, coord_liste):
-    """ Pour une classe donnée, compare les coordonnées stockées aux coordonnées détectées
-        Pour mettre à jour, ajouter ou supprimer les objets de la hashmap objets
-        Param : id_classes
-                coord_liste """
+    """
+    Pour une classe donnée, compare les coordonnées stockées aux coordonnées détectées
+    Pour mettre à jour, ajouter ou supprimer les objets de la hashmap objets
+    Param : id_classes : l'id du type d'objet, 1 pour personne, 91 pour animal
+            coord_liste : la liste des coordonnées détectées sur une image pour un type d'objet
+    """
 
     value_hashmap = classes_hashmap[id_classes]
     new_value_hashmap = {}
@@ -210,10 +185,12 @@ def majValeurHashmap(id_classes, coord_liste):
 
 
 def coordAssezProches(coord_initial, coord_plus_proches):
-    """ Compare deux ensembles de coordonnées
-        Renvoie True si les deux ensembles sont proches de moins de coord_pourcentage
-        Param : coord_initial
-                coord_plus_proches """
+    """
+    Compare deux ensembles de coordonnées
+    Renvoie True si les deux ensembles sont proches de moins de coord_pourcentage
+    Param : coord_initial : les coordonnées initiales de l'objet
+            coord_plus_proches : les coordonnées à comparer
+    """
 
     global hauteur, largeur
 
@@ -237,9 +214,11 @@ def coordAssezProches(coord_initial, coord_plus_proches):
 
 
 def hashmapIdDisponible(hashmap):
-    """ Retourne un id disponible pour la hashmap passée en paramètre
-        Permet de recycler les id au lieu de les incrémenter à l'infini
-        Param : hashmap """
+    """
+    Retourne un id disponible pour la hashmap passée en paramètre
+    Permet de recycler les id au lieu de les incrémenter à l'infini
+    Param : hashmap : un dictionnaire dans lequel on recherche un id disponible
+    """
 
     id_disponible = -1
     if len(hashmap) == 0:
@@ -256,6 +235,10 @@ def hashmapIdDisponible(hashmap):
 
 
 def majVariablesGestion():
+    """
+    Lit les valeurs du fichier gestion.txt et les retourne
+    """
+
     fichier_gestion = open(chemin_gestion, "r")
     contenu_fichier = fichier_gestion.read()
     destinataire = contenu_fichier.split(";")[0]
@@ -346,11 +329,10 @@ with detection_graph.as_default():
                             for x, y, w, h in face:
                                 # Si le visage est compris dans la zone de détection de la personne
                                 if x >= xmin and x + w <= xmax and y >= ymin and y + h <= ymax:
-                                    # TODO: Dans le if ou le else (connu ou non sur la frame) mettre la condition de notif
-                                    # A étaler sur plusieurs frames pour être sûr ? En discussion
                                     roi_gray = cv2.resize(gray[y:y + h, x:x + w], (var_algo.min_size, var_algo.min_size))
                                     id_, conf = recognizer.predict(roi_gray)
 
+                                    # Si on reconnait le visage
                                     if conf <= 95:
                                         # TODO: mettre en place un compteur pour confirmer la détection sur plusieurs frames ?
                                         objet.set_reconnu(True)
@@ -404,9 +386,10 @@ with detection_graph.as_default():
                                     # On envoie la notif
                                     nom_video = objet.get_chemin_fichier().split("/")[-1]
                                     dir_videos = objet.get_chemin_fichier().replace(nom_video, "")
-                                    envoi_mail.envoyermail(destinataire, "Intrusion",
-                                                           "Une personne inconnue a été détectée", dir_videos,
-                                                           nom_video)
+                                    envoi_mail.envoyerMail(destinataire, "Alerte",
+                                                           "Une personne inconnue a été détectée",
+                                                           dir_videos, nom_video)
+                                    envoi_sms.envoyerSms(telephone, "Une personne inconnue a été détectée.")
                                     objet.set_alerte_envoyee(True)
                                     cpt_personnes_inconnues -= 1
 
@@ -440,8 +423,9 @@ with detection_graph.as_default():
                             if objet.get_cpt_fin_mouvement() == 0:
                                 nom_photo = objet.get_chemin_fichier().split("/")[-1]
                                 dir_photos = objet.get_chemin_fichier().replace(nom_photo, "")
-                                envoi_mail.envoyermail(destinataire, "Détection animal", "Un animal sauvage a été détecté",
+                                envoi_mail.envoyerMail(destinataire, "Détection animal", "Un animal sauvage a été détecté",
                                                        dir_photos, nom_photo)
+                                envoi_sms.envoyerSms(telephone, "Un animal sauvage a été détecté.")
                                 objet.set_chemin_fichier(None)
 
                             objet.set_cpt_fin_mouvement(objet.get_cpt_fin_mouvement() - 1)

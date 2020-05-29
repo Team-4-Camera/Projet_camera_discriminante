@@ -86,10 +86,12 @@ labels = {
     91: "animal"
 }
 
+# le répertoire dans lequel sont enregistrés les photos et vidéos
+chemin_enregistrements = "..\\media\\enregistrement_journalier\\"
 # le répertoire dans lequel sont enregistrés les photos des animaux
-chemin_animaux = repertoire_courant + "..\\media\\enregistrement_journalier\\animaux\\"
+chemin_animaux = repertoire_courant + chemin_enregistrements + "animaux\\"
 # le répertoire dans lequel sont enregistrés les vidéos des humains
-chemin_humains = repertoire_courant + "..\\media\\enregistrement_journalier\\humains\\"
+chemin_humains = repertoire_courant + chemin_enregistrements + "humains\\"
 # le répertoire dans lequel sont enregistrées les photos de création de vidéo
 chemin_photos_temp = repertoire_courant + "..\\media\\photos_temp\\"
 # le modèle COCO utilisé pour la détection des personnes et des animaux

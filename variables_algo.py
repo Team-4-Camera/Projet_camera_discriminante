@@ -1,5 +1,6 @@
 import os
 
+# Le répertoire courant de ce fichier et des différents scripts python du projet
 repertoire_courant = os.getcwd() + "\\"
 
 labels = {

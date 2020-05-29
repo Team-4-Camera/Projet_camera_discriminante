@@ -427,16 +427,22 @@ with detection_graph.as_default():
                                                            dir_videos, nom_video)
                                     envoi_sms.envoyerSms(telephone, "Une personne inconnue a été détectée.")
 
+                                    # Récupération du fichier json des notifications
                                     notifications_json = open(chemin_notifications_json, "wt")
                                     myjson = json.loads(notifications_json.read())
 
+                                    # Récupération du tableau des notifications
                                     tableau_notifications = notifications.get("notifications")
+
+                                    # Nouvelle notification
                                     notif = {
                                         "status": 0,
                                         "date": temps.strftime("%Y/%m/%d %H:%M:%S"),
                                         "path": dir_videos + nom_video,
                                         "type": "humain"
                                     }
+
+                                    # Ajout de la notification dans le json
                                     tableau_notifications.append(notif)
                                     notifications = json.dumps(myjson)
                                     notifications_json.write(notifications)
@@ -480,16 +486,27 @@ with detection_graph.as_default():
                                                        dir_photos, nom_photo)
                                 envoi_sms.envoyerSms(telephone, "Un animal sauvage a été détecté.")
                                 objet.set_chemin_fichier(None)
+
+                                # Récupération du fichier json des notifications
                                 notifications_json = open(chemin_notifications_json, "wt")
                                 myjson = json.loads(notifications_json.read())
 
+                                # Récupération du tableau des notifications
                                 tableau_notifications = notifications.get("notifications")
+
+                                # Nouvelle notification
                                 notif = {
                                     "status": 0,
                                     "date": temps.strftime("%Y/%m/%d %H:%M:%S"),
                                     "path": dir_photos + nom_photo,
                                     "type": "animal"
                                 }
+
+                                # Ajout de la notification dans le json
+                                tableau_notifications.append(notif)
+                                notifications = json.dumps(myjson)
+                                notifications_json.write(notifications)
+                                notifications_json.close()
 
                             objet.set_cpt_fin_mouvement(objet.get_cpt_fin_mouvement() - 1)
 

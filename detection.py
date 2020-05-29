@@ -3,6 +3,7 @@ import numpy as np
 import tensorflow.compat.v1 as tf
 import cv2
 import time
+import json
 import variables_algo as var_algo
 import envoi_mail
 import envoi_sms
@@ -27,6 +28,7 @@ confirmation_detection = var_algo.confirmation_detection
 coord_pourcentage = var_algo.coord_pourcentage
 video_fps = var_algo.video_fps
 chemin_gestion = var_algo.chemin_gestion
+chemin_notifications_json = var_algo.chemin_notifications_json
 
 # Nombre de personnes inconnues et n'ayant pas encore déclenché l'alerte sur l'écran
 cpt_personnes_inconnues = 0
@@ -354,15 +356,17 @@ with detection_graph.as_default():
                                     # Récupére le répertoire concernant la personne détectée
                                     dir_videos = chemin_humains
 
+                                    temps = time
+                                    jour = temps.strftime("%Y_%m_%d")
                                     # Crée le repertoire du jour courant s'il n'existe pas
-                                    if not os.path.isdir(dir_videos + time.strftime("%Y_%m_%d")):
-                                        os.mkdir(dir_videos + time.strftime("%Y_%m_%d"))
+                                    if not os.path.isdir(dir_videos + jour):
+                                        os.mkdir(dir_videos + jour)
 
                                     # Met à jour le répertoire ou il faut enregistrer l'image de l'animal
-                                    dir_videos = dir_videos + time.strftime("%Y_%m_%d") + "/"
+                                    dir_videos = dir_videos + jour + "/"
 
                                     objet.set_chemin_fichier(
-                                        dir_videos + time.strftime("%Y_%m_%d_%H_%M_%S") + ".avi")
+                                        dir_videos + temps.strftime("%Y_%m_%d_%H_%M_%S") + ".avi")
                                     video = cv2.VideoWriter(objet.get_chemin_fichier(),
                                                             cv2.VideoWriter_fourcc(*'DIVX'), video_fps, (largeur, hauteur))
                                     liste_images = []
@@ -390,6 +394,22 @@ with detection_graph.as_default():
                                                            "Une personne inconnue a été détectée",
                                                            dir_videos, nom_video)
                                     envoi_sms.envoyerSms(telephone, "Une personne inconnue a été détectée.")
+
+                                    notifications_json = open(chemin_notifications_json, "wt")
+                                    myjson = json.loads(notifications_json.read())
+
+                                    tableau_notifications = notifications.get("notifications")
+                                    notif = {
+                                        "status": 0,
+                                        "date": temps.strftime("%Y/%m/%d %H:%M:%S"),
+                                        "path": dir_videos + nom_video,
+                                        "type": "humain"
+                                    }
+                                    tableau_notifications.append(notif)
+                                    notifications = json.dumps(myjson)
+                                    notifications_json.write(notifications)
+                                    notifications_json.close()
+
                                     objet.set_alerte_envoyee(True)
                                     cpt_personnes_inconnues -= 1
 
@@ -406,16 +426,17 @@ with detection_graph.as_default():
                                 # Récupére le répertoire concernant l'animal détecté
                                 dir_photos = chemin_animaux
 
+                                temps = time
                                 # Crée le repertoire du jour courant s'il n'existe pas
-                                if not os.path.isdir(dir_photos + time.strftime("%Y_%m_%d")):
-                                    os.mkdir(dir_photos + time.strftime("%Y_%m_%d"))
+                                if not os.path.isdir(dir_photos + temps.strftime("%Y_%m_%d")):
+                                    os.mkdir(dir_photos + temps.strftime("%Y_%m_%d"))
 
                                 # Met à jour le répertoire ou il faut enregistrer l'image de l'animal
-                                dir_photos = dir_photos + time.strftime("%Y_%m_%d") + "/"
+                                dir_photos = dir_photos + temps.strftime("%Y_%m_%d") + "/"
 
                                 # On crée un fichier photo
                                 if fichier_photo is None:
-                                    nom_photo = time.strftime("%Y_%m_%d_%H_%M_%S") + ".png"
+                                    nom_photo = temps.strftime("%Y_%m_%d_%H_%M_%S") + ".png"
                                     fichier_photo = dir_photos + nom_photo
                                     objet.set_chemin_fichier(fichier_photo)
                                     cv2.imwrite(fichier_photo, frame)
@@ -427,6 +448,16 @@ with detection_graph.as_default():
                                                        dir_photos, nom_photo)
                                 envoi_sms.envoyerSms(telephone, "Un animal sauvage a été détecté.")
                                 objet.set_chemin_fichier(None)
+                                notifications_json = open(chemin_notifications_json, "wt")
+                                myjson = json.loads(notifications_json.read())
+
+                                tableau_notifications = notifications.get("notifications")
+                                notif = {
+                                    "status": 0,
+                                    "date": temps.strftime("%Y/%m/%d %H:%M:%S"),
+                                    "path": dir_photos + nom_photo,
+                                    "type": "animal"
+                                }
 
                             objet.set_cpt_fin_mouvement(objet.get_cpt_fin_mouvement() - 1)
 

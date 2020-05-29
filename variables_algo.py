@@ -83,17 +83,19 @@ labels = {
 }
 
 # le répertoire dans lequel sont enregistrés les photos des animaux
-chemin_animaux = "media/enregistrement_journalier/animaux/"
+chemin_animaux = "../media/enregistrement_journalier/animaux/"
 # le répertoire dans lequel sont enregistrés les vidéos des humains
-chemin_humains = "media/enregistrement_journalier/humains/"
+chemin_humains = "../media/enregistrement_journalier/humains/"
 # le répertoire dans lequel sont enregistrées les photos de création de vidéo
-chemin_photos_temp = "media/photos_temp/"
+chemin_photos_temp = "../media/photos_temp/"
 # le modèle COCO utilisé pour la détection des personnes et des animaux
 modele_detection = 'ssd_mobilenet_v2_coco_2018_03_29'
 # son graphe associé
 chemin_graphe = modele_detection + '/frozen_inference_graph.pb'
 # Chemin pour accéder au gestion.txt
-chemin_gestion = "C:/wamp64/www/projet_camera/Application_web_camera_discriminante/gestion_site/gestion.txt"
+chemin_gestion = "../gestion_site/gestion.txt"
+# Chemin du fichier json des notifications
+chemin_notifications_json = '../gestion_site/notifications.json'
 
 # un compteur d'images avant de confirmer la détection des objets sur l'image
 confirmation_detection = 5

@@ -8,6 +8,9 @@ import envoi_mail
 import envoi_sms
 import Personne
 import Animal
+import re
+from datetime import datetime, timedelta
+import shutil
 
 tf.disable_v2_behavior()
 
@@ -27,6 +30,7 @@ confirmation_detection = var_algo.confirmation_detection
 coord_pourcentage = var_algo.coord_pourcentage
 video_fps = var_algo.video_fps
 chemin_gestion = var_algo.chemin_gestion
+chemin_enregistrements = var_algo.chemin_enregistrements
 
 # Nombre de personnes inconnues et n'ayant pas encore déclenché l'alerte sur l'écran
 cpt_personnes_inconnues = 0
@@ -42,7 +46,8 @@ recognizer.read("trainner.yml")
 
 # la source de la vidéo, 0 pour cam intégré (sys.argv[] cast en int si argument), nom d'un fichier pour vidéo
 source_video = 0
-
+date_courante = None
+regex_date = re.compile("^([0-9]{4}(_[0-9]{2}){2})$")
 classes_hashmap = {1: {}, 91: {}}
 
 # *************************** Partie Fonctions *************************************
@@ -249,6 +254,29 @@ def majVariablesGestion():
     return destinataire, telephone, etat_appli
 
 
+def purgeAnciennesVideosPhotos():
+    """
+    Purge les vidéos et les photos anciennes de plus de 31 jours
+    Le traitement s'effectue au lancement de la caméra, puis une fois par jour si la caméra est active
+    """
+
+    global regex_jour
+    global date_courante
+
+    date_courante = time.strftime("%Y_%m_%d")
+
+    for root, dirs, files in os.walk(chemin_enregistrements):
+        if len(dirs):
+            for dir in dirs:
+                if regex_date.match(dir):
+                    date_dir = datetime.strptime(dir, "%Y_%m_%d")
+                    date_limite = datetime.strptime(date_courante, "%Y_%m_%d") - timedelta(days=31)
+
+                    if date_dir < date_limite:
+                        path = os.path.join(root, dir)
+                        shutil.rmtree(path, ignore_errors=True)
+
+
 # *************************** Partie IA tensorflow *************************************
 
 # Lecture du modèle qui a déjà été entrainé avec le dataset COCO
@@ -286,6 +314,10 @@ with detection_graph.as_default():
 
             # Mise à jour des variables de gestion
             destinataire, telephone, etat_appli = majVariablesGestion()
+
+            # Purge des anciennes photos et vieilles vidéos
+            if date_courante is None or date_courante != time.strftime("%Y_%m_%d"):
+                purgeAnciennesVideosPhotos()
 
             # Lit les images provenant de la source vidéo
             ret, frame = cap.read()

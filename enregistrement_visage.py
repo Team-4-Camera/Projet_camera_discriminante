@@ -4,15 +4,15 @@ import os
 import variables_algo
 
 # le fichier doit être appelé comme suit
-# python enregistrement_visage.py XXX.mp4 YYY
+# python enregistrement_visage.py AAA/BBB/XXX/YYY.mp4 AAA/BBB/YYY
 # XXX étant le nom de la vidéo et YYY le nom du répertoire dans lequel on stocke les photos (robin par exemple)
 
-face_cascade = cv2.CascadeClassifier("./haarcascade_frontalface_alt2.xml")
+face_cascade = cv2.CascadeClassifier("..\\python\\haarcascade_frontalface_alt2.xml")
 # cette utilisation par arguments passés ne permet plus l'utilisation avec une cam de l'ordinateur
 # il faut donner une vidéo en paramètre
 fichier_video = sys.argv[1]
 cap = cv2.VideoCapture(fichier_video)
-chemin_enregistrement = '../media/personnes_connues/' + sys.argv[2]
+chemin_enregistrement = sys.argv[2]
 
 # Variable paramétrable
 # définit le nombre d'images qu'on laisse passer entre deux enregistrements d'images quand on lit une vidéo

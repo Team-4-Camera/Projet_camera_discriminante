@@ -44,7 +44,7 @@ etat_appli = "true"
 
 # Récupération du fichier d'entrainement
 recognizer = cv2.face.LBPHFaceRecognizer_create()
-recognizer.read("trainner.yml")
+recognizer.read("..\\python\\trainner.yml")
 
 # la source de la vidéo, 0 pour cam intégré (sys.argv[] cast en int si argument), nom d'un fichier pour vidéo
 source_video = 0

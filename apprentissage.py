@@ -4,7 +4,8 @@ import numpy as np
 import pickle
 import variables_algo as algo
 
-image_dir = "media/personnes_connues/"
+image_dir = "..\\media\\personnes_connues\\"
+python_dir = "..\\python\\"
 current_id = 0
 label_ids = {}
 x_train = []
@@ -27,7 +28,7 @@ for root, dirs, files in os.walk(image_dir):
                     x_train.append(image)
                     y_labels.append(id_)
 
-with open("labels.pickle", "wb") as f:
+with open(python_dir + "labels.pickle", "wb") as f:
     pickle.dump(label_ids, f)
 
 x_train = np.array(x_train)
@@ -35,4 +36,4 @@ y_labels = np.array(y_labels)
 # Reconnaissance de visage
 recognizer = cv2.face.LBPHFaceRecognizer_create()
 recognizer.train(x_train, y_labels)
-recognizer.save("trainner.yml")
+recognizer.save(python_dir + "trainner.yml")
